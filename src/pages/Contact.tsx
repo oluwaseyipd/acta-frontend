@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Mail, MapPin, Phone, Send, MessageSquare, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
+import {
+  sendEmail,
+  initEmailJS,
+  isEmailConfigured,
+  getConfigStatus,
+} from "@/services/emailjs";
 
 const contactSchema = z.object({
   name: z
@@ -69,18 +75,54 @@ const Contact = () => {
     resolver: zodResolver(contactSchema),
   });
 
+  useEffect(() => {
+    // Initialize EmailJS when component mounts
+    initEmailJS();
+
+    // Check configuration in development
+    if (import.meta.env.DEV) {
+      const status = getConfigStatus();
+      console.log("EmailJS Configuration Status:", status);
+
+      if (!status.isFullyConfigured) {
+        console.warn(
+          "EmailJS is not fully configured. Please check your environment variables in .env file.",
+        );
+      }
+    }
+  }, []);
+
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
 
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      // Check if EmailJS is configured
+      if (!isEmailConfigured()) {
+        throw new Error(
+          "Email service is not configured. Please contact the administrator.",
+        );
+      }
 
-    toast.success("Message sent successfully!", {
-      description: "We'll get back to you within 24 hours.",
-    });
+      // Send email using EmailJS
+      await sendEmail(data);
 
-    reset();
-    setIsSubmitting(false);
+      toast.success("Message sent successfully!", {
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      reset();
+    } catch (error) {
+      console.error("Contact form error:", error);
+
+      toast.error("Failed to send message", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Please try again later or contact us directly.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
