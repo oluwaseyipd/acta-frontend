@@ -11,6 +11,8 @@ import { initEmailJS } from "@/services/emailjs";
 
 // Public Pages
 import Index from "./pages/Index";
+import About from "./pages/About";
+import Features from "./pages/Features";
 import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
@@ -34,6 +36,8 @@ const App = () => {
             <Sonner />
             <Routes>
               <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/features" element={<Features />} />
               <Route path="/pricing" element={<Pricing />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
