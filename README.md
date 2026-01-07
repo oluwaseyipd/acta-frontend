@@ -1,7 +1,7 @@
 # Acta
 
 <div align="center">
-  <img src="src/assets/hero-image.png" alt="Acta Dashboard" width="100%" />
+  <img src="src/assets/readme-image.png" alt="Acta Dashboard" width="100%" />
 </div>
 
 ## 🌊 Introduction
