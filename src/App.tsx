@@ -9,7 +9,9 @@ import BackToTopButton from "@/components/utils/BackToTopButton";
 
 // Public Pages
 import Index from "./pages/Index";
+import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -22,6 +24,7 @@ const App = () => (
           <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="/contact" element={<Contact />} />
           </Routes>
           <BackToTopButton />
