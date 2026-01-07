@@ -36,7 +36,7 @@ export const Footer = () => {
               <div className="p-2 rounded-xl bg-primary text-primary-foreground">
                 <Waves className="h-5 w-5" />
               </div>
-              <span className="text-xl font-bold text-gradient">TaskTide</span>
+              <span className="text-xl font-bold text-gradient">Acta</span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Manage your tasks with elegance and efficiency.

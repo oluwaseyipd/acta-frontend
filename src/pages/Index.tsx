@@ -73,7 +73,7 @@ const testimonials = [
     role: "Product Manager at TechCorp",
     avatar: "SC",
     content:
-      "TaskTide transformed how our team collaborates. The intuitive interface and powerful features helped us ship 40% faster.",
+      "Acta transformed how our team collaborates. The intuitive interface and powerful features helped us ship 40% faster.",
     rating: 5,
   },
   {
@@ -81,7 +81,7 @@ const testimonials = [
     role: "Freelance Designer",
     avatar: "MJ",
     content:
-      "As a freelancer juggling multiple clients, TaskTide keeps me organized and on top of every deadline. Absolutely essential!",
+      "As a freelancer juggling multiple clients, Acta keeps me organized and on top of every deadline. Absolutely essential!",
     rating: 5,
   },
   {
@@ -105,7 +105,7 @@ const testimonials = [
     role: "Marketing Director",
     avatar: "LT",
     content:
-      "Our marketing campaigns are so much more organized now. TaskTide pays for itself in time saved.",
+      "Our marketing campaigns are so much more organized now. Acta pays for itself in time saved.",
     rating: 5,
   },
   {
@@ -181,9 +181,9 @@ const Index = () => {
               transition={{ delay: 0.3 }}
               className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
             >
-              TaskTide brings simplicity and power together. Organize your
-              workflow, track progress, and achieve more with our beautifully
-              designed task manager.
+              Acta brings simplicity and power together. Organize your workflow,
+              track progress, and achieve more with our beautifully designed
+              task manager.
             </motion.p>
 
             <motion.div
@@ -215,7 +215,7 @@ const Index = () => {
               <div className="rounded-xl overflow-hidden shadow-2xl">
                 <img
                   src={heroImage}
-                  alt="TaskTide Dashboard Preview"
+                  alt="Acta Dashboard Preview"
                   className="w-full h-auto rounded-xl"
                 />
               </div>
@@ -334,7 +334,7 @@ const Index = () => {
               Loved by Thousands of Users
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              See what our community has to say about TaskTide
+              See what our community has to say about Acta
             </p>
           </motion.div>
         </div>

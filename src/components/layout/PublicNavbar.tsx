@@ -56,7 +56,7 @@ export const PublicNavbar = () => {
             >
               <Waves className="h-5 w-5" />
             </motion.div>
-            <span className="text-xl font-bold text-gradient">TaskTide</span>
+            <span className="text-xl font-bold text-gradient">Acta</span>
           </Link>
 
           {/* Desktop Navigation */}
