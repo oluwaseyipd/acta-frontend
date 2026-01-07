@@ -17,6 +17,11 @@ import Pricing from "./pages/Pricing";
 import Contact from "./pages/Contact";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
+import NotFound from "./pages/NotFound";
+
+// Authentication Pages
+import SignIn from "./pages/auth/SignIn";
+import Register from "./pages/auth/Register";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +47,11 @@ const App = () => {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
+
+              <Route path="/auth/register" element={<Register />} />
+              <Route path="/auth/signin" element={<SignIn />} />
+
+              <Route path="*" element={<NotFound />} />
             </Routes>
             <BackToTopButton />
           </TooltipProvider>
