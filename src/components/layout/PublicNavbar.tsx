@@ -41,11 +41,7 @@ export const PublicNavbar = () => {
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled
-            ? "glass border-b border-border/50 shadow-lg"
-            : "bg-transparent"
-        }`}
+        className="fixed top-0 left-0 right-0 z-50 bg-background transition-all duration-300"
       >
         <div className="container mx-auto px-6 h-16 flex items-center justify-between">
           {/* Logo */}
@@ -124,7 +120,7 @@ export const PublicNavbar = () => {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-x-0 top-16 z-40 glass border-b border-border/50 md:hidden"
+            className="fixed inset-x-0 top-16 z-40 bg-background border-b border-border shadow-lg md:hidden"
           >
             <div className="container mx-auto px-6 py-4 space-y-2">
               {navLinks.map((link) => (

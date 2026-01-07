@@ -97,7 +97,7 @@ export const Footer = () => {
           {/* Column 5: Social */}
           <div className="space-y-4">
             {/*<h4 className="font-semibold text-foreground">Follow Us</h4>*/}
-            <div className="flex flex-col space-y-3">
+            <div className="flex flex-row space-x-3 md:flex-col md:space-y-3 md:space-x-0">
               {socialLinks.map((social) => (
                 <a
                   key={social.name}
@@ -117,7 +117,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} TaskTide. All rights reserved.
+            © {new Date().getFullYear()} Acta. All rights reserved.
           </p>
           <p className="text-sm text-muted-foreground">
             Built by{" "}
