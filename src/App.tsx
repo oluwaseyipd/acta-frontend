@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 // Public Pages
 import Index from "./pages/Index";
-
+import Contact from "./pages/Contact";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -19,6 +19,7 @@ const App = () => (
           <Sonner />
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/contact" element={<Contact />} />
           </Routes>
         </TooltipProvider>
       </QueryClientProvider>
