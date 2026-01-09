@@ -4,14 +4,14 @@ import { Waves, Github, Twitter, Linkedin, CheckCircle2 } from "lucide-react";
 const productLinks = [
   { name: "Features", path: "/features" },
   { name: "Pricing", path: "/pricing" },
-  { name: "Changelog", path: "/changelog" },
+  // { name: "Changelog", path: "/changelog" },
 ];
 
 const companyLinks = [
   { name: "About Us", path: "/about" },
   { name: "Contact", path: "/contact" },
-  { name: "Careers", path: "/careers" },
-  { name: "Blog", path: "/blog" },
+  // { name: "Careers", path: "/careers" },
+  // { name: "Blog", path: "/blog" },
 ];
 
 const legalLinks = [

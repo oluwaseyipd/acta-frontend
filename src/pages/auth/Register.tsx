@@ -87,19 +87,22 @@ const Register = () => {
           className="w-full max-w-md space-y-8"
         >
           {/* Mobile Logo */}
-          <div className="lg:hidden flex items-center justify-center gap-3 mb-8">
+          <Link
+            to="/"
+            className="lg:hidden flex items-center justify-center gap-3 mb-8"
+          >
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-primary-foreground" />
             </div>
             <span className="text-2xl font-bold text-foreground">Acta</span>
-          </div>
+          </Link>
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-accent" />
             </div>
             <span className="text-2xl font-bold">Acta</span>
-          </div>
+          </Link>
 
           {/* Header */}
           <div className="text-center lg:text-left">
