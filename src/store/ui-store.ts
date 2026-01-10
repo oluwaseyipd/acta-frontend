@@ -1,6 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
+export type ThemePreset =
+  | "midnight"
+  | "forest"
+  | "sunset"
+  | "lavender"
+  | "nordic"
+  | "cyberpunk";
 export type ColorMode = "light" | "dark" | "system";
 
 interface UIState {
@@ -14,6 +21,8 @@ interface UIState {
   setCommandPaletteOpen: (open: boolean) => void;
 
   // Theme
+  themePreset: ThemePreset;
+  setThemePreset: (preset: ThemePreset) => void;
   colorMode: ColorMode;
   setColorMode: (mode: ColorMode) => void;
 
@@ -36,6 +45,8 @@ export const useUIStore = create<UIState>()(
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
 
       // Theme
+      themePreset: "midnight",
+      setThemePreset: (preset) => set({ themePreset: preset }),
       colorMode: "system",
       setColorMode: (mode) => set({ colorMode: mode }),
 
@@ -44,9 +55,10 @@ export const useUIStore = create<UIState>()(
       setTaskViewMode: (mode) => set({ taskViewMode: mode }),
     }),
     {
-      name: "acta-ui-storage",
+      name: "tasktide-ui-storage",
       partialize: (state) => ({
         sidebarCollapsed: state.sidebarCollapsed,
+        themePreset: state.themePreset,
         colorMode: state.colorMode,
         taskViewMode: state.taskViewMode,
       }),

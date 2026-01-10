@@ -19,6 +19,10 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsOfService from "./pages/TermsOfService";
 import NotFound from "./pages/NotFound";
 
+// Dashboard Pages
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import DashboardOverview from "./pages/dashboard/Overview";
+
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
 import Register from "./pages/auth/Register";
@@ -40,6 +44,7 @@ const App = () => {
             <Toaster />
             <Sonner />
             <Routes>
+              // Public Routes
               <Route path="/" element={<Index />} />
               <Route path="/about" element={<About />} />
               <Route path="/features" element={<Features />} />
@@ -47,10 +52,14 @@ const App = () => {
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy" element={<PrivacyPolicy />} />
               <Route path="/terms" element={<TermsOfService />} />
-
+              // Authentication Routes
               <Route path="/auth/register" element={<Register />} />
               <Route path="/auth/signin" element={<SignIn />} />
-
+              // Dashboard Routes
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<DashboardOverview />} />
+              </Route>
+              ;
               <Route path="*" element={<NotFound />} />
             </Routes>
             <BackToTopButton />

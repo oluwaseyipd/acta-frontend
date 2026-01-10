@@ -51,7 +51,7 @@ const SignIn = () => {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-primary-foreground" />
             </div>
-            <span className="text-2xl font-bold text-foreground">TaskTide</span>
+            <span className="text-2xl font-bold text-foreground">Acta</span>
           </Link>
 
           {/* Logo */}
@@ -59,7 +59,7 @@ const SignIn = () => {
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-accent" />
             </div>
-            <span className="text-2xl font-bold">TaskTide</span>
+            <span className="text-2xl font-bold">Acta</span>
           </Link>
 
           {/* Header */}
