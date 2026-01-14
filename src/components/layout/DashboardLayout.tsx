@@ -21,7 +21,7 @@ export function DashboardLayout() {
 
       <div
         className={cn(
-          "flex-1 flex flex-col min-h-screen transition-all duration-300",
+          "flex-1 flex flex-col min-h-screen transition-all duration-300 overflow-hidden",
           sidebarCollapsed ? "ml-[72px]" : "ml-[256px]",
         )}
       >
@@ -33,9 +33,11 @@ export function DashboardLayout() {
           animate="animate"
           exit="exit"
           transition={{ duration: 0.3, ease: "easeOut" }}
-          className="flex-1 p-6 overflow-hidden flex flex-col"
+          className="flex-1 flex flex-col min-w-0 overflow-hidden"
         >
-          <Outlet />
+          <div className="flex-1 p-6 flex flex-col min-w-0 max-w-full overflow-hidden">
+            <Outlet />
+          </div>
         </motion.main>
       </div>
 
