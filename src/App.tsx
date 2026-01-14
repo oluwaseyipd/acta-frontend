@@ -23,6 +23,7 @@ import NotFound from "./pages/NotFound";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/Overview";
 import Tasks from "./pages/dashboard/Tasks";
+import Today from "./pages/dashboard/Today";
 
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
@@ -59,6 +60,7 @@ const App = () => {
               // Dashboard Routes
               <Route path="/dashboard" element={<DashboardLayout />}>
                 <Route index element={<DashboardOverview />} />
+                <Route path="today" element={<Today />} />
                 <Route path="tasks" element={<Tasks />} />
               </Route>
               ;
