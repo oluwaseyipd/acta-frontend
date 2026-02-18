@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-// import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
+import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
@@ -220,10 +220,10 @@ export function Sidebar() {
       </motion.aside>
 
       {/* Create Task Modal */}
-      {/*<CreateTaskModal
+      <CreateTaskModal
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
-      />*/}
+      />
     </>
   );
 }

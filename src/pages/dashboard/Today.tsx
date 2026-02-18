@@ -7,6 +7,12 @@ import { usePopSound } from "@/hooks/use-sound";
 import { toast } from "sonner";
 import { format, isToday, isBefore, startOfDay } from "date-fns";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
+import { 
+  useQuery,
+  useMutation, 
+  useQueryClient
+} from "@tanstack/react-query";
+import { taskApi } from "@/api/tasks";
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "in_progress" | "completed";
@@ -104,23 +110,79 @@ export default function Today() {
   );
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
+
+   // 2. All TanStack Hooks
+  const queryClient = useQueryClient();
   const { playPop } = usePopSound();
 
-  const handleTaskClick = (task: Task) => {
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: taskApi.getAll,
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: Status }) => 
+      taskApi.update(id, { status }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: (updatedTask: Task) => taskApi.update(updatedTask.id, updatedTask),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task updated!");
+    },
+  });
+
+  // 3. Handlers (Updated to use Mutations)
+  const handleSaveTask = (updatedTask: Task) => {
+    updateTaskMutation.mutate(updatedTask);
+  };
+
+    const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setDetailModalOpen(true);
   };
 
-  const handleSaveTask = (updatedTask: Task) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
-    );
-  };
+  const handleToggleComplete = useCallback(
+    (taskId: string) => {
+      const task = (data ?? []).find((t) => t.id === taskId);
+      if (!task) return;
 
+      const wasCompleted = task.status === "completed";
+
+      if (!wasCompleted) {
+        setCompletingTasks((prev) => new Set(prev).add(taskId));
+        playPop();
+
+        setTimeout(() => {
+          toggleMutation.mutate({ id: taskId, status: "completed" });
+          setCompletingTasks((prev) => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+
+          toast.success("Task completed!", {
+            action: {
+              label: "UNDO",
+              onClick: () => toggleMutation.mutate({ id: taskId, status: "todo" }),
+            },
+          });
+        }, 400);
+      } else {
+        toggleMutation.mutate({ id: taskId, status: "todo" });
+      }
+    },
+    [data, playPop, toggleMutation]
+  );
+
+
+   // 5. Data Filtering Logic
+  const allTasks = data ?? [];
   const today = startOfDay(new Date());
 
-  // Filter tasks for today and overdue (excluding completed)
-  const todayTasks = tasks.filter((task) => {
+  const todayTasks = allTasks.filter((task) => {
     const dueDate = new Date(task.dueDate);
     return (
       isToday(dueDate) &&
@@ -129,7 +191,7 @@ export default function Today() {
     );
   });
 
-  const overdueTasks = tasks.filter((task) => {
+  const overdueTasks = allTasks.filter((task) => {
     const dueDate = startOfDay(new Date(task.dueDate));
     return (
       isBefore(dueDate, today) &&
@@ -138,69 +200,22 @@ export default function Today() {
     );
   });
 
-  const handleToggleComplete = useCallback(
-    (taskId: string) => {
-      const task = tasks.find((t) => t.id === taskId);
-      if (!task) return;
+      if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Loading tasks...</p>
+      </div>
+    );
+  }
 
-      const wasCompleted = task.status === "completed";
-      const previousStatus = task.status;
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full"> 
+        <p className="text-destructive">Error loading tasks</p>
+      </div>
+    );
+  }
 
-      if (!wasCompleted) {
-        setCompletingTasks((prev) => new Set(prev).add(taskId));
-        playPop();
-
-        setTimeout(() => {
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === taskId ? { ...t, status: "completed" as Status } : t,
-            ),
-          );
-          setCompletingTasks((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
-
-          toast.success("Task completed!", {
-            description: task.title,
-            action: {
-              label: "UNDO",
-              onClick: () => {
-                setTasks((prev) =>
-                  prev.map((t) =>
-                    t.id === taskId ? { ...t, status: previousStatus } : t,
-                  ),
-                );
-                toast.info("Task restored");
-              },
-            },
-            position: "bottom-center",
-          });
-        }, 400);
-      } else {
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId ? { ...t, status: "todo" as Status } : t,
-          ),
-        );
-        toast.info("Task marked as incomplete", {
-          action: {
-            label: "UNDO",
-            onClick: () => {
-              setTasks((prev) =>
-                prev.map((t) =>
-                  t.id === taskId ? { ...t, status: "completed" as Status } : t,
-                ),
-              );
-            },
-          },
-          position: "bottom-center",
-        });
-      }
-    },
-    [tasks, playPop],
-  );
 
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return "";

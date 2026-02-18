@@ -8,6 +8,12 @@ import {
   Clock,
   Plus,
 } from "lucide-react";
+import { 
+  useQuery,
+  useMutation, 
+  useQueryClient
+} from "@tanstack/react-query";
+import { taskApi } from "@/api/tasks";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -33,257 +39,6 @@ interface Task {
   dueTime?: string;
 }
 
-const mockTasks: Task[] = [
-  // Jan 4
-  {
-    id: "1",
-    title: "Design system update",
-    description: "Update colors and typography",
-    priority: "high",
-    status: "in_progress",
-    createdAt: "2024-12-20",
-    dueDate: "2026-01-04",
-    dueTime: "14:00",
-  },
-  {
-    id: "2",
-    title: "API integration",
-    description: "Connect to Django backend",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-21",
-    dueDate: "2026-01-04",
-    dueTime: "10:00",
-  },
-  // Jan 5
-  {
-    id: "3",
-    title: "Write unit tests",
-    description: "Cover main components",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-22",
-    dueDate: "2026-01-05",
-    dueTime: "16:30",
-  },
-  {
-    id: "4",
-    title: "Documentation",
-    description: "Update README file",
-    priority: "low",
-    status: "completed",
-    createdAt: "2024-12-18",
-    dueDate: "2026-01-05",
-    dueTime: "09:00",
-  },
-  {
-    id: "5",
-    title: "Code review session",
-    description: "Review pull requests",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-23",
-    dueDate: "2026-01-05",
-    dueTime: "11:00",
-  },
-  {
-    id: "6",
-    title: "Bug fixes",
-    description: "Fix login issues",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-24",
-    dueDate: "2026-01-05",
-    dueTime: "15:00",
-  },
-  {
-    id: "7",
-    title: "Team standup",
-    description: "Daily sync meeting",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-24",
-    dueDate: "2026-01-05",
-    dueTime: "09:30",
-  },
-  // Jan 6
-  {
-    id: "8",
-    title: "Performance optimization",
-    description: "Reduce bundle size",
-    priority: "medium",
-    status: "in_progress",
-    createdAt: "2024-12-23",
-    dueDate: "2026-01-06",
-    dueTime: "11:00",
-  },
-  {
-    id: "9",
-    title: "Database migration",
-    description: "Migrate to new schema",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-24",
-    dueDate: "2026-01-06",
-    dueTime: "15:00",
-  },
-  // Jan 7
-  {
-    id: "10",
-    title: "User feedback review",
-    description: "Analyze survey results",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-25",
-    dueDate: "2026-01-07",
-    dueTime: "10:00",
-  },
-  {
-    id: "11",
-    title: "Design mockups",
-    description: "Create new landing page",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-25",
-    dueDate: "2026-01-07",
-    dueTime: "14:00",
-  },
-  {
-    id: "12",
-    title: "Client meeting",
-    description: "Project status update",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-25",
-    dueDate: "2026-01-07",
-    dueTime: "16:00",
-  },
-  // Jan 8
-  {
-    id: "13",
-    title: "Security audit",
-    description: "Review auth flow",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-26",
-    dueDate: "2026-01-08",
-    dueTime: "09:00",
-  },
-  {
-    id: "14",
-    title: "Feature planning",
-    description: "Q1 roadmap review",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-26",
-    dueDate: "2026-01-08",
-    dueTime: "11:00",
-  },
-  {
-    id: "15",
-    title: "API documentation",
-    description: "Update Swagger docs",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-26",
-    dueDate: "2026-01-08",
-    dueTime: "14:00",
-  },
-  {
-    id: "16",
-    title: "Testing session",
-    description: "E2E testing",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-26",
-    dueDate: "2026-01-08",
-    dueTime: "16:00",
-  },
-  {
-    id: "17",
-    title: "Deployment prep",
-    description: "Staging environment",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-26",
-    dueDate: "2026-01-08",
-    dueTime: "17:00",
-  },
-  // Jan 9
-  {
-    id: "18",
-    title: "Sprint retrospective",
-    description: "Team feedback session",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-27",
-    dueDate: "2026-01-09",
-    dueTime: "10:00",
-  },
-  {
-    id: "19",
-    title: "Infrastructure review",
-    description: "AWS cost optimization",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-27",
-    dueDate: "2026-01-09",
-    dueTime: "14:00",
-  },
-  // Jan 10
-  {
-    id: "20",
-    title: "Release preparation",
-    description: "Version 2.0 release",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-28",
-    dueDate: "2026-01-10",
-    dueTime: "09:00",
-  },
-  {
-    id: "21",
-    title: "Marketing sync",
-    description: "Launch campaign review",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-28",
-    dueDate: "2026-01-10",
-    dueTime: "11:00",
-  },
-  {
-    id: "22",
-    title: "Training session",
-    description: "New feature onboarding",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-28",
-    dueDate: "2026-01-10",
-    dueTime: "15:00",
-  },
-  // Jan 11
-  {
-    id: "23",
-    title: "Weekend monitoring",
-    description: "Check system health",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-29",
-    dueDate: "2026-01-11",
-    dueTime: "10:00",
-  },
-  {
-    id: "24",
-    title: "Backup verification",
-    description: "Verify backup integrity",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-29",
-    dueDate: "2026-01-11",
-    dueTime: "12:00",
-  },
-];
-
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",
   medium: "bg-warning/10 text-warning border-warning/20",
@@ -297,9 +52,9 @@ const statusColors = {
 };
 
 export default function Tasks() {
+  // 1. All Local State
   const { taskViewMode, setTaskViewMode } = useUIStore();
   const [searchQuery, setSearchQuery] = useState("");
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [completingTasks, setCompletingTasks] = useState<Set<string>>(
     new Set(),
   );
@@ -309,31 +64,100 @@ export default function Tasks() {
   const [createDefaultDate, setCreateDefaultDate] = useState<Date | undefined>(
     undefined,
   );
+
+
+  // 2. All TanStack Hooks (Keep these at the top!)
+  const queryClient = useQueryClient();
   const { playPop } = usePopSound();
 
-  const filteredTasks = tasks.filter(
-    (task) =>
-      task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      !completingTasks.has(task.id),
-  );
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: taskApi.getAll, 
+  });
 
-  // Group tasks by due date for kanban view
-  const groupedByDate = filteredTasks.reduce(
-    (acc, task) => {
-      const dateKey = task.dueDate;
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
-      acc[dateKey].push(task);
-      return acc;
+
+// Mutation for Toggling Complete
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: Status }) => 
+      taskApi.update(id, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    {} as Record<string, Task[]>,
+  });
+
+
+
+// Mutation for Saving/Updating Task Details
+  const updateTaskMutation = useMutation({
+    mutationFn: (updatedTask: Task) => taskApi.update(updatedTask.id, updatedTask),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Task updated!");
+    },
+  });
+
+
+  // ---------------------------------------------------------
+  // 4. NOW AND ONLY NOW: EARLY RETURNS
+  // ---------------------------------------------------------
+  const filteredTasks = (data ?? []).filter(
+    (task) =>
+      task.status !== "completed" &&
+      task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      !completingTasks.has(task.id)
   );
 
-  // Sort dates chronologically
+
+  const groupedByDate = filteredTasks.reduce((acc, task) => {
+    const dateKey = task.dueDate;
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(task);
+    return acc;
+  }, {} as Record<string, Task[]>);
+
+
   const sortedDates = Object.keys(groupedByDate).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
+
+
+  // ---------------------------------------------------------
+  // 5. DATA PROCESSING (Filtering, Sorting, Grouping)
+  // ---------------------------------------------------------
+  const handleSaveTask = (updatedTask: Task) => {
+    updateTaskMutation.mutate(updatedTask);
+  };
+
+
+
+
+  const handleToggleComplete = useCallback(
+    (taskId: string, e?: React.MouseEvent) => {
+      if (e) e.stopPropagation();
+      const task = data?.find((t) => t.id === taskId);
+      if (!task) return;
+
+      const wasCompleted = task.status === "completed";
+
+      if (!wasCompleted) {
+        setCompletingTasks((prev) => new Set(prev).add(taskId));
+        playPop();
+        setTimeout(() => {
+          toggleMutation.mutate({ id: taskId, status: "completed" });
+          setCompletingTasks((prev) => {
+            const next = new Set(prev);
+            next.delete(taskId);
+            return next;
+          });
+          toast.success("Task completed!");
+        }, 400);
+      } else {
+        toggleMutation.mutate({ id: taskId, status: "todo" });
+      }
+    },
+    [data, playPop, toggleMutation]
+  );
+
 
   const formatColumnDate = (dateStr: string) => {
     try {
@@ -350,81 +174,8 @@ export default function Tasks() {
     setIsDetailModalOpen(true);
   };
 
-  const handleSaveTask = (updatedTask: Task) => {
-    setTasks((prev) =>
-      prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)),
-    );
-    toast.success("Task updated!");
-  };
 
-  const handleToggleComplete = useCallback(
-    (taskId: string, e?: React.MouseEvent) => {
-      if (e) e.stopPropagation();
 
-      const task = tasks.find((t) => t.id === taskId);
-      if (!task) return;
-
-      const wasCompleted = task.status === "completed";
-      const previousStatus = task.status;
-
-      if (!wasCompleted) {
-        // Mark as completing (trigger animation)
-        setCompletingTasks((prev) => new Set(prev).add(taskId));
-        playPop();
-
-        // After animation, update status
-        setTimeout(() => {
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.id === taskId ? { ...t, status: "completed" as Status } : t,
-            ),
-          );
-          setCompletingTasks((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
-
-          toast.success("Task completed!", {
-            description: task.title,
-            action: {
-              label: "UNDO",
-              onClick: () => {
-                setTasks((prev) =>
-                  prev.map((t) =>
-                    t.id === taskId ? { ...t, status: previousStatus } : t,
-                  ),
-                );
-                toast.info("Task restored");
-              },
-            },
-            position: "bottom-center",
-          });
-        }, 400);
-      } else {
-        // Uncomplete the task
-        setTasks((prev) =>
-          prev.map((t) =>
-            t.id === taskId ? { ...t, status: "todo" as Status } : t,
-          ),
-        );
-        toast.info("Task marked as incomplete", {
-          action: {
-            label: "UNDO",
-            onClick: () => {
-              setTasks((prev) =>
-                prev.map((t) =>
-                  t.id === taskId ? { ...t, status: "completed" as Status } : t,
-                ),
-              );
-            },
-          },
-          position: "bottom-center",
-        });
-      }
-    },
-    [tasks, playPop],
-  );
 
   const formatDate = (dateStr: string) => {
     try {
@@ -442,6 +193,23 @@ export default function Tasks() {
     const displayHour = hour % 12 || 12;
     return `${displayHour}:${minutes} ${ampm}`;
   };
+
+    if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p>Loading tasks...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full"> 
+        <p className="text-destructive">Error loading tasks</p>
+      </div>
+    );
+  }
+
 
   return (
     <motion.div

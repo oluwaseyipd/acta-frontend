@@ -3,116 +3,101 @@ import { CheckSquare, Clock, TrendingUp, Zap } from "lucide-react";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { DailyProgressRadial } from "@/components/dashboard/DailyProgressRadial";
 import { TasksDueToday } from "@/components/dashboard/TasksDueToday";
-import { useState } from "react";
-
-// Mock data - will be replaced with API calls
-const mockTasks = [
-  {
-    id: "1",
-    title: "Review project proposal",
-    priority: "high" as const,
-    completed: false,
-    dueTime: "10:00 AM",
-  },
-  {
-    id: "2",
-    title: "Team standup meeting",
-    priority: "medium" as const,
-    completed: true,
-    dueTime: "11:00 AM",
-  },
-  {
-    id: "3",
-    title: "Update documentation",
-    priority: "low" as const,
-    completed: false,
-    dueTime: "2:00 PM",
-  },
-  {
-    id: "4",
-    title: "Code review for feature branch",
-    priority: "high" as const,
-    completed: false,
-    dueTime: "4:00 PM",
-  },
-  {
-    id: "5",
-    title: "Send weekly report",
-    priority: "medium" as const,
-    completed: false,
-    dueTime: "5:00 PM",
-  },
-];
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // 
+import { taskApi } from "@/api/tasks"; // 
+import { format } from "date-fns";
 
 export default function DashboardOverview() {
-  const [tasks, setTasks] = useState(mockTasks);
+  const queryClient = useQueryClient();
+
+  // 1. Fetch the data
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["tasks"],
+    queryFn: taskApi.getAll,
+  });
+
+  // 2. Toggle Mutation
+  const toggleMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: any }) =>
+      taskApi.update(id, { status }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
+  });
+
+  // 3. Early Returns
+  if (isLoading) return <div>Loading Overview...</div>;
+  if (error) return <div>Error loading data.</div>;
+
+
+
+  const allTasks = data ?? [];
+
+  // Logic for "Due Today" (Comparing task.dueDate with today's date)
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const tasksDueToday = allTasks.filter((t) => t.dueDate === todayStr);
+
+
+  // 4. Calculate Stats Dynamically
+  const todayTotalTasks = tasksDueToday.length;
+  const todayCompletedTasks = tasksDueToday.filter((t) => t.status === "completed");
+  const todayInProgressTasks = tasksDueToday.filter((t) => t.status === "in_progress");
+  
+
+    // 4. Calculate Stats Dynamically
+  const totalTasks = allTasks.length;
+  const completedTasks = allTasks.filter((t) => t.status === "completed");
+  const inProgressTasks = allTasks.filter((t) => t.status === "in_progress");
+  
+
 
   const handleToggleComplete = (id: string) => {
-    setTasks(
-      tasks.map((task) =>
-        task.id === id ? { ...task, completed: !task.completed } : task,
-      ),
-    );
+    const task = tasksDueToday.find((t) => t.id === id);
+    if (!task) return;
+    const newStatus = task.status === "completed" ? "todo" : "completed";
+    toggleMutation.mutate({ id, status: newStatus });
   };
 
-  const completedCount = tasks.filter((t) => t.completed).length;
-
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="space-y-6"
-    >
-      {/* Page Header */}
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Welcome back!</h1>
-        <p className="text-muted-foreground mt-1">
-          Here's what's happening with your tasks today.
-        </p>
+        <p className="text-muted-foreground mt-1">Here's what's happening today.</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Using real data now */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatsCard
           title="Total Tasks"
-          value={24}
-          change="+3 from yesterday"
-          changeType="positive"
+          value={totalTasks}
+          change={`+${totalTasks} total`}
           icon={CheckSquare}
-          delay={0}
         />
         <StatsCard
           title="Completed"
-          value={18}
-          change="75% completion rate"
-          changeType="positive"
+          value={completedTasks.length}
+          change={`${Math.round((completedTasks.length / totalTasks) * 100 || 0)}% rate`}
           icon={TrendingUp}
-          delay={0.1}
         />
         <StatsCard
           title="In Progress"
-          value={4}
-          change="2 due today"
-          changeType="neutral"
+          value={inProgressTasks.length}
           icon={Clock}
-          delay={0.2}
         />
         <StatsCard
-          title="Overdue"
-          value={2}
-          change="Needs attention"
-          changeType="negative"
+          title="Due Today"
+          value={tasksDueToday.length}
           icon={Zap}
-          delay={0.3}
         />
       </div>
 
-      {/* Progress & Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <DailyProgressRadial completed={completedCount} total={tasks.length} />
+        <DailyProgressRadial 
+           completed={completedTasks.length} 
+           total={totalTasks} 
+        />
         <div className="lg:col-span-2">
+          {/* Note: Ensure TasksDueToday uses the field names from your API (e.g. status vs completed) */}
           <TasksDueToday
-            tasks={tasks}
+            tasks={tasksDueToday}
             onToggleComplete={handleToggleComplete}
           />
         </div>

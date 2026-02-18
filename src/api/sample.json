@@ -1,0 +1,244 @@
+{
+  "tasks": [
+    {
+      "id": "1",
+      "title": "Design system update",
+      "description": "Update colors and typography",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-20",
+      "dueDate": "2026-01-04",
+      "dueTime": "14:00"
+    },
+    {
+      "id": "2",
+      "title": "API integration",
+      "description": "Connect to Django backend",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-21",
+      "dueDate": "2026-01-04",
+      "dueTime": "10:00"
+    },
+    {
+      "id": "3",
+      "title": "Write unit tests",
+      "description": "Cover main components",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-22",
+      "dueDate": "2026-01-05",
+      "dueTime": "16:30"
+    },
+    {
+      "id": "4",
+      "title": "Documentation",
+      "description": "Update README file",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-18",
+      "dueDate": "2026-01-05",
+      "dueTime": "09:00"
+    },
+    {
+      "id": "5",
+      "title": "Code review session",
+      "description": "Review pull requests",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-23",
+      "dueDate": "2026-01-05",
+      "dueTime": "11:00"
+    },
+    {
+      "id": "6",
+      "title": "Bug fixes",
+      "description": "Fix login issues",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-24",
+      "dueDate": "2026-01-05",
+      "dueTime": "15:00"
+    },
+    {
+      "id": "7",
+      "title": "Team standup",
+      "description": "Daily sync meeting",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-24",
+      "dueDate": "2026-01-05",
+      "dueTime": "09:30"
+    },
+    {
+      "id": "8",
+      "title": "Performance optimization",
+      "description": "Reduce bundle size",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-23",
+      "dueDate": "2026-01-06",
+      "dueTime": "11:00"
+    },
+    {
+      "id": "9",
+      "title": "Database migration",
+      "description": "Migrate to new schema",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-24",
+      "dueDate": "2026-01-06",
+      "dueTime": "15:00"
+    },
+    {
+      "id": "10",
+      "title": "User feedback review",
+      "description": "Analyze survey results",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-25",
+      "dueDate": "2026-01-07",
+      "dueTime": "10:00"
+    },
+    {
+      "id": "11",
+      "title": "Design mockups",
+      "description": "Create new landing page",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-25",
+      "dueDate": "2026-01-07",
+      "dueTime": "14:00"
+    },
+    {
+      "id": "12",
+      "title": "Client meeting",
+      "description": "Project status update",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-25",
+      "dueDate": "2026-01-07",
+      "dueTime": "16:00"
+    },
+    {
+      "id": "13",
+      "title": "Security audit",
+      "description": "Review auth flow",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-26",
+      "dueDate": "2026-01-08",
+      "dueTime": "09:00"
+    },
+    {
+      "id": "14",
+      "title": "Feature planning",
+      "description": "Q1 roadmap review",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-26",
+      "dueDate": "2026-01-08",
+      "dueTime": "11:00"
+    },
+    {
+      "id": "15",
+      "title": "API documentation",
+      "description": "Update Swagger docs",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-26",
+      "dueDate": "2026-01-08",
+      "dueTime": "14:00"
+    },
+    {
+      "id": "16",
+      "title": "Testing session",
+      "description": "E2E testing",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-26",
+      "dueDate": "2026-01-08",
+      "dueTime": "16:00"
+    },
+    {
+      "id": "17",
+      "title": "Deployment prep",
+      "description": "Staging environment",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-26",
+      "dueDate": "2026-01-08",
+      "dueTime": "17:00"
+    },
+    {
+      "id": "18",
+      "title": "Sprint retrospective",
+      "description": "Team feedback session",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-27",
+      "dueDate": "2026-01-09",
+      "dueTime": "10:00"
+    },
+    {
+      "id": "19",
+      "title": "Infrastructure review",
+      "description": "AWS cost optimization",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-27",
+      "dueDate": "2026-01-09",
+      "dueTime": "14:00"
+    },
+    {
+      "id": "20",
+      "title": "Release preparation",
+      "description": "Version 2.0 release",
+      "priority": "high",
+      "status": "completed",
+      "createdAt": "2024-12-28",
+      "dueDate": "2026-01-10",
+      "dueTime": "09:00"
+    },
+    {
+      "id": "21",
+      "title": "Marketing sync",
+      "description": "Launch campaign review",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-28",
+      "dueDate": "2026-01-10",
+      "dueTime": "11:00"
+    },
+    {
+      "id": "22",
+      "title": "Training session",
+      "description": "New feature onboarding",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-28",
+      "dueDate": "2026-01-10",
+      "dueTime": "15:00"
+    },
+    {
+      "id": "23",
+      "title": "Weekend monitoring",
+      "description": "Check system health",
+      "priority": "low",
+      "status": "completed",
+      "createdAt": "2024-12-29",
+      "dueDate": "2026-01-11",
+      "dueTime": "10:00"
+    },
+    {
+      "id": "24",
+      "title": "Backup verification",
+      "description": "Verify backup integrity",
+      "priority": "medium",
+      "status": "completed",
+      "createdAt": "2024-12-29",
+      "dueDate": "2026-01-11",
+      "dueTime": "12:00"
+    }
+  ]
+}
