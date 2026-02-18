@@ -258,9 +258,32 @@ export default function Tasks() {
         </div>
       </div>
 
-      {/* Task View - Scrollable Area */}
-      {taskViewMode === "list" ? (
-        <div className="space-y-6 overflow-y-auto flex-1">
+    <div className="flex-1 overflow-y-auto">
+      {filteredTasks.length === 0 ? (
+      <div className="flex flex-col items-center justify-center h-full py-12 text-center">
+          <div className="p-4 bg-muted/20 rounded-full mb-4">
+            <LayoutList className="h-12 w-12 text-muted-foreground/40" />
+          </div>
+          <h2 className="text-xl font-semibold">No tasks found</h2>
+          <p className="text-muted-foreground mt-2 max-w-[250px]">
+            {searchQuery 
+              ? `No results for "${searchQuery}". Try a different search.` 
+              : "Your task list is empty. Ready to start something new?"}
+          </p>
+          {!searchQuery && (
+            <Button 
+              onClick={() => setIsCreateModalOpen(true)} 
+              className="mt-6 gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add your first task
+            </Button>
+          )}
+        </div>
+
+      ) : (
+      taskViewMode === "list" ? (
+        <div className="space-y-6">
           {sortedDates.map((dateKey) => (
             <div key={dateKey}>
               {/* Date Header */}
@@ -470,7 +493,11 @@ export default function Tasks() {
             </div>
           ))}
         </div>
-      )}
+      ))}
+      </div>
+
+
+
 
       {/* Task Detail Modal */}
       <TaskDetailModal

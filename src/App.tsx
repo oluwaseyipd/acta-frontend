@@ -25,6 +25,7 @@ import DashboardOverview from "./pages/dashboard/Overview";
 import Tasks from "./pages/dashboard/Tasks";
 import Today from "./pages/dashboard/Today";
 import Completed from "./pages/dashboard/Completed";
+import Analytics from "./pages/dashboard/Analytics"
 
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
@@ -64,6 +65,7 @@ const App = () => {
                 <Route path="today" element={<Today />} />
                 <Route path="tasks" element={<Tasks />} />
                 <Route path="completed" element={<Completed />} />
+                <Route path="analytics" element={<Analytics />} />
               </Route>
               ;
               <Route path="*" element={<NotFound />} />

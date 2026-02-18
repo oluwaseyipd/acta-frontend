@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { CalendarIcon, Clock } from "lucide-react";
-import { format } from "date-fns";
+import { format, isToday } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -44,6 +44,20 @@ const taskSchema = z.object({
   priority: z.enum(["low", "medium", "high"]),
   dueDate: z.date().optional(),
   dueTime: z.string().optional(),
+}).refine((data) => {
+  // If no date or no time is picked, skip the "past check"
+  if (!data.dueDate || !data.dueTime) return true;
+
+  const now = new Date();
+  const selectedDateTime = new Date(data.dueDate);
+  const [hours, minutes] = data.dueTime.split(":").map(Number);
+  selectedDateTime.setHours(hours, minutes, 0, 0);
+
+  // Validation: Must be in the future
+  return selectedDateTime > now;
+}, {
+  message: "Selected time has already passed",
+  path: ["dueTime"],
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
@@ -104,6 +118,22 @@ export function CreateTaskModal({
     form.reset();
     onOpenChange(false);
   };
+
+const selectedDate = form.watch("dueDate");
+
+
+const filteredTimeOptions = React.useMemo(() => {
+  if (!selectedDate || !isToday(selectedDate)) return timeOptions;
+
+  const now = new Date();
+  const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
+
+  return timeOptions.filter((option) => {
+    const [h, m] = option.value.split(":").map(Number);
+    return (h * 60 + m) > currentTotalMinutes;
+  });
+}, [selectedDate]);
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -206,18 +236,17 @@ export function CreateTaskModal({
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) =>
-                            date < new Date(new Date().setHours(0, 0, 0, 0))
-                          }
-                          initialFocus
-                          className={cn("p-3 pointer-events-auto")}
-                        />
-                      </PopoverContent>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            // Disables all days before today
+                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                            initialFocus
+                            className={cn("p-3 pointer-events-auto")}
+                          />
+                        </PopoverContent>
                     </Popover>
                     <FormMessage />
                   </FormItem>
@@ -240,11 +269,17 @@ export function CreateTaskModal({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-60">
-                        {timeOptions.map((time) => (
-                          <SelectItem key={time.value} value={time.value}>
-                            {time.label}
-                          </SelectItem>
-                        ))}
+                       {filteredTimeOptions.length > 0 ? (
+                          filteredTimeOptions.map((time) => (
+                            <SelectItem key={time.value} value={time.value}>
+                              {time.label}
+                            </SelectItem>
+                          ))
+                        ) : (
+                          <div className="p-2 text-xs text-center text-muted-foreground italic">
+                            No more available times for today
+                          </div>
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
