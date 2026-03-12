@@ -24,6 +24,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
+import PageLoading from "@/components/dashboard/PageLoading";
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "in_progress" | "completed";
@@ -100,7 +101,9 @@ export default function Tasks() {
   // ---------------------------------------------------------
   // 4. NOW AND ONLY NOW: EARLY RETURNS
   // ---------------------------------------------------------
-  const filteredTasks = (data ?? []).filter(
+  const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
+
+  const filteredTasks = (allTasks ?? []).filter(
     (task) =>
       task.status !== "completed" &&
       task.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -134,7 +137,8 @@ export default function Tasks() {
   const handleToggleComplete = useCallback(
     (taskId: string, e?: React.MouseEvent) => {
       if (e) e.stopPropagation();
-      const task = data?.find((t) => t.id === taskId);
+          const tasksArray = Array.isArray(data) ? data : (data?.results ?? []);
+          const task = tasksArray.find((t: Task) => t.id === taskId);
       if (!task) return;
 
       const wasCompleted = task.status === "completed";
@@ -194,21 +198,11 @@ export default function Tasks() {
     return `${displayHour}:${minutes} ${ampm}`;
   };
 
-    if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading tasks...</p>
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoading />;
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full"> 
-        <p className="text-destructive">Error loading tasks</p>
-      </div>
-    );
-  }
+
+  if (error) return <div className="flex items-center justify-center h-full"><p className="text-destructive">Error loading tasks</p></div>;
+
 
 
   return (

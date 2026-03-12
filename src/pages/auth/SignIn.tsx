@@ -7,30 +7,47 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '@/lib/auth';
 
 const SignIn = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    rememberMe: false,
+    // rememberMe: false,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Define the mutation
+  const loginMutation = useMutation({
+    mutationFn: authApi.login,
+    onSuccess: (data) => {
+      // 1. Save tokens from your Django response
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+
+      toast.success("Welcome back!", {
+        description: "You have been signed in successfully.",
+      });
+
+      // 2. Redirect
+      navigate("/dashboard");
+    },
+    onError: (error: any) => {
+      // Axios error handling
+      const message = error.response?.data?.detail || "Invalid credentials";
+      toast.error("Sign in failed", { description: message });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    toast.success("Welcome back!", {
-      description: "You have been signed in successfully.",
+    // Trigger the mutation with form data
+    loginMutation.mutate({
+      email: formData.email, // Django usually expects 'username' or 'email'
+      password: formData.password
     });
-
-    setIsLoading(false);
-    navigate("/dashboard");
   };
 
   return (
@@ -55,7 +72,7 @@ const SignIn = () => {
           </Link>
 
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/" className="hidden md:flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-accent" />
             </div>
@@ -122,7 +139,7 @@ const SignIn = () => {
             </div>
 
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
+              {/* <div className="flex items-center gap-2">
                 <Checkbox
                   id="remember"
                   checked={formData.rememberMe}
@@ -136,7 +153,7 @@ const SignIn = () => {
                 >
                   Remember me
                 </Label>
-              </div>
+              </div> */}
               <Link
                 to="/auth/forgot-password"
                 className="text-sm text-primary hover:underline font-medium"
@@ -148,9 +165,9 @@ const SignIn = () => {
             <Button
               type="submit"
               className="w-full h-12 text-base font-semibold group"
-              disabled={isLoading}
+              disabled={loginMutation.isPending}
             >
-              {isLoading ? (
+              {loginMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Signing in...

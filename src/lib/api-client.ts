@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from 'axios';
 
 // API Configuration - Update this with your Django backend URL
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // Create axios instance with default config
 const apiClient: AxiosInstance = axios.create({
@@ -53,10 +53,10 @@ apiClient.interceptors.response.use(
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh failed, logout user
+        // Refresh failed, logout user and redirect to signin
         localStorage.removeItem('access_token');
         localStorage.removeItem('refresh_token');
-        window.location.href = '/login';
+        window.location.href = '/auth/signin';
         return Promise.reject(refreshError);
       }
     }
@@ -68,7 +68,7 @@ apiClient.interceptors.response.use(
 // API endpoints
 export const endpoints = {
   // Auth
-  login: '/auth/login/',
+  signin: '/auth/login/',
   register: '/auth/register/',
   logout: '/auth/logout/',
   refresh: '/auth/refresh/',

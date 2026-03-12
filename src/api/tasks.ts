@@ -1,23 +1,25 @@
+import apiClient, { endpoints } from '@/lib/api-client'; 
+
 export const taskApi = {
-  // Fetch all tasks
+
+  
+  create: async (taskData: any) => {
+    // endpoints.tasks is likely '/tasks/'
+    const { data } = await apiClient.post(endpoints.tasks, taskData);
+    return data;
+  },
+  // Now uses Axios + your Interceptors automatically!
   getAll: async () => {
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/tasks`);
-    if (!res.ok) throw new Error("Failed to fetch tasks");
-    return res.json();
+    const { data } = await apiClient.get(endpoints.tasks);
+    return data; 
   },
 
-  // Update a single task (status or details)
   update: async (id: string, updates: Partial<Task>) => {
-    const res = await fetch(`${import.meta.env.VITE_BASE_URL}/tasks/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
-    });
-    return res.json();
+    const { data } = await apiClient.patch(endpoints.taskDetail(id), updates);
+    return data;
   },
 
-  // Delete a task
   delete: async (id: string) => {
-    await fetch(`${import.meta.env.VITE_BASE_URL}/tasks/${id}`, { method: "DELETE" });
-  }
+    await apiClient.delete(endpoints.taskDetail(id));
+  },
 };

@@ -13,6 +13,7 @@ import {
   Waves,
   CheckCircle2,
   Plus,
+  Inbox
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/store/ui-store";
@@ -26,6 +27,7 @@ import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
+  { icon: Inbox, label: "Inbox", href: "/dashboard/inbox" },
   { icon: CalendarClock, label: "Today", href: "/dashboard/today" },
   { icon: CheckSquare, label: "Tasks", href: "/dashboard/tasks" },
   { icon: CheckCircle2, label: "Completed", href: "/dashboard/completed" },

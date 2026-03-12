@@ -5,7 +5,8 @@ import { DailyProgressRadial } from "@/components/dashboard/DailyProgressRadial"
 import { TasksDueToday } from "@/components/dashboard/TasksDueToday";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; // 
 import { taskApi } from "@/api/tasks"; // 
-import { format } from "date-fns";
+import { format, isToday, parseISO } from "date-fns";
+import PageLoading  from '../../components/dashboard/PageLoading';
 
 export default function DashboardOverview() {
   const queryClient = useQueryClient();
@@ -24,16 +25,20 @@ export default function DashboardOverview() {
   });
 
   // 3. Early Returns
-  if (isLoading) return <div>Loading Overview...</div>;
-  if (error) return <div>Error loading data.</div>;
+  if (isLoading) return <PageLoading />;
+  if (error) return <div className="flex items-center justify-center h-full"><p className="text-destructive">Error loading tasks</p></div>;
 
 
 
-  const allTasks = data ?? [];
+const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
 
-  // Logic for "Due Today" (Comparing task.dueDate with today's date)
+  // Logic for "Due Today" (Comparing task.due_date with today's date)
   const todayStr = format(new Date(), "yyyy-MM-dd");
-  const tasksDueToday = allTasks.filter((t) => t.dueDate === todayStr);
+  const tasksDueToday = allTasks.filter((t) => t.due_date === todayStr);
+
+  const todayTasksCount = allTasks.filter(t => 
+  t.due_date && isToday(parseISO(t.due_date)) && t.status !== "completed"
+).length;
 
 
   // 4. Calculate Stats Dynamically
@@ -68,8 +73,7 @@ export default function DashboardOverview() {
         <StatsCard
           title="Total Tasks"
           value={totalTasks}
-          change={`+${totalTasks} total`}
-          icon={CheckSquare}
+          icon={Zap}
         />
         <StatsCard
           title="Completed"
@@ -92,13 +96,12 @@ export default function DashboardOverview() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DailyProgressRadial 
            completed={completedTasks.length} 
-           total={totalTasks} 
+           total={todayTotalTasks} 
         />
         <div className="lg:col-span-2">
           {/* Note: Ensure TasksDueToday uses the field names from your API (e.g. status vs completed) */}
           <TasksDueToday
-            tasks={tasksDueToday}
-            onToggleComplete={handleToggleComplete}
+            tasks={allTasks}
           />
         </div>
       </div>

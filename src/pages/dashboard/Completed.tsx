@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import { toast } from "@/components/ui/sonner";
 import { format } from "date-fns";
+import PageLoading from "@/components/dashboard/PageLoading";
 
 
 
@@ -82,7 +83,8 @@ const statusColors = {
 
 
   // 1. Filter: Completed AND matching search
-  const completedTasks = (data ?? []).filter(
+  const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
+  const completedTasks = (allTasks ?? []).filter(
     (task) =>
       task.status === "completed" &&
       task.title.toLowerCase().includes(searchQuery.toLowerCase())
@@ -143,21 +145,8 @@ const handleSaveTask = (updatedTask: Task) => {
     };
 
 
-    if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading tasks...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full"> 
-        <p className="text-destructive">Error loading tasks</p>
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoading />;
+  if (error) return <div className="flex items-center justify-center h-full"><p className="text-destructive">Error loading tasks</p></div>;
 
     return (
     <motion.div

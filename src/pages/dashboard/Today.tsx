@@ -7,6 +7,8 @@ import { usePopSound } from "@/hooks/use-sound";
 import { toast } from "sonner";
 import { format, isToday, isBefore, startOfDay } from "date-fns";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
+import PageLoading from "@/components/dashboard/PageLoading";
+
 import { 
   useQuery,
   useMutation, 
@@ -28,69 +30,6 @@ interface Task {
   dueTime?: string;
 }
 
-const mockTasks: Task[] = [
-  {
-    id: "1",
-    title: "Design system update",
-    description: "Update colors and typography",
-    priority: "high",
-    status: "in_progress",
-    createdAt: "2024-12-20",
-    dueDate: "2026-01-02",
-    dueTime: "14:00",
-  },
-  {
-    id: "2",
-    title: "API integration",
-    description: "Connect to Django backend",
-    priority: "high",
-    status: "todo",
-    createdAt: "2024-12-21",
-    dueDate: "2026-01-02",
-    dueTime: "10:00",
-  },
-  {
-    id: "3",
-    title: "Write unit tests",
-    description: "Cover main components",
-    priority: "medium",
-    status: "todo",
-    createdAt: "2024-12-22",
-    dueDate: "2026-01-02",
-    dueTime: "16:30",
-  },
-  {
-    id: "4",
-    title: "Documentation",
-    description: "Update README file",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-18",
-    dueDate: "2025-12-30",
-    dueTime: "09:00",
-  },
-  {
-    id: "5",
-    title: "Performance optimization",
-    description: "Reduce bundle size",
-    priority: "medium",
-    status: "in_progress",
-    createdAt: "2024-12-23",
-    dueDate: "2025-12-28",
-    dueTime: "11:00",
-  },
-  {
-    id: "6",
-    title: "Code review",
-    description: "Review pull requests",
-    priority: "low",
-    status: "todo",
-    createdAt: "2024-12-24",
-    dueDate: "2025-12-25",
-    dueTime: "15:00",
-  },
-];
-
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",
   medium: "bg-warning/10 text-warning border-warning/20",
@@ -104,7 +43,6 @@ const statusColors = {
 };
 
 export default function Today() {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [completingTasks, setCompletingTasks] = useState<Set<string>>(
     new Set(),
   );
@@ -144,9 +82,11 @@ export default function Today() {
     setDetailModalOpen(true);
   };
 
+
   const handleToggleComplete = useCallback(
     (taskId: string) => {
-      const task = (data ?? []).find((t) => t.id === taskId);
+     const tasksArray = Array.isArray(data) ? data : (data?.results ?? []);
+    const task = tasksArray.find((t: any) => t.id === taskId);
       if (!task) return;
 
       const wasCompleted = task.status === "completed";
@@ -178,44 +118,35 @@ export default function Today() {
   );
 
 
-   // 5. Data Filtering Logic
-  const allTasks = data ?? [];
-  const today = startOfDay(new Date());
+// 5. Data Filtering Logic
+const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
+const now = new Date();
+const todayStart = startOfDay(now);
 
-  const todayTasks = allTasks.filter((task) => {
-    const dueDate = new Date(task.dueDate);
-    return (
-      isToday(dueDate) &&
-      task.status !== "completed" &&
-      !completingTasks.has(task.id)
-    );
-  });
+// Helper to handle both 'dueDate' and 'due_date' depending on your API serializer
+const getTaskDate = (task: any) => startOfDay(new Date(task.due_date || task.dueDate));
 
-  const overdueTasks = allTasks.filter((task) => {
-    const dueDate = startOfDay(new Date(task.dueDate));
-    return (
-      isBefore(dueDate, today) &&
-      task.status !== "completed" &&
-      !completingTasks.has(task.id)
-    );
-  });
+const todayTasks = allTasks.filter((task) => {
+  const taskDate = getTaskDate(task);
+  return (
+    isToday(taskDate) &&
+    task.status !== "completed" &&
+    !completingTasks.has(task.id)
+  );
+});
 
-      if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading tasks...</p>
-      </div>
-    );
-  }
+const overdueTasks = allTasks.filter((task) => {
+  const taskDate = getTaskDate(task);
+  return (
+    isBefore(taskDate, todayStart) &&
+    task.status !== "completed" &&
+    !completingTasks.has(task.id)
+  );
+});
+  if (isLoading) return <PageLoading />;
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full"> 
-        <p className="text-destructive">Error loading tasks</p>
-      </div>
-    );
-  }
 
+  if (error) return <div className="flex items-center justify-center h-full"><p className="text-destructive">Error loading tasks</p></div>;
 
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return "";
@@ -326,7 +257,7 @@ export default function Today() {
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="space-y-6"
+      className="space-y-6 flex flex-col h-[calc(100vh-12rem)]"
     >
       {/* Header */}
       <div>
@@ -337,10 +268,10 @@ export default function Today() {
       </div>
 
       {/* Two Column Layout: Overdue (left) | Today (right) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex-1 flex gap-6 overflow-x-auto pb-6 scrollbar-thin snap-x">
         {/* Overdue Column */}
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-destructive text-destructive-foreground shadow-lg">
+        <div className="w-[300px] md:w-[650px] shrink-0 flex flex-col snap-start">
+          <div className="p-4 rounded-xl bg-destructive text-destructive-foreground shadow-lg mb-4 sticky top-0 z-10">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
               <h2 className="font-bold">Overdue</h2>
@@ -351,7 +282,7 @@ export default function Today() {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-none">
             <AnimatePresence mode="popLayout">
               {overdueTasks.length > 0 ? (
                 overdueTasks.map((task) => (
@@ -371,8 +302,8 @@ export default function Today() {
         </div>
 
         {/* Today Column */}
-        <div className="space-y-4">
-          <div className="p-4 rounded-xl bg-primary text-primary-foreground shadow-lg">
+        <div className="w-[300px] md:w-[650px] shrink-0 flex flex-col snap-start">
+          <div className="p-4 rounded-xl bg-primary text-primary-foreground shadow-lg mb-4 sticky top-0 z-10">
             <div className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               <h2 className="font-bold">Today's Tasks</h2>
@@ -383,7 +314,7 @@ export default function Today() {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-none">
             <AnimatePresence mode="popLayout">
               {todayTasks.length > 0 ? (
                 todayTasks.map((task) => <TaskCard key={task.id} task={task} />)

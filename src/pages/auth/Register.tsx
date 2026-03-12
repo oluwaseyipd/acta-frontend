@@ -16,6 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
+import { useMutation } from '@tanstack/react-query';
+import { authApi } from '@/lib/auth';
 
 const passwordRequirements = [
   {
@@ -41,39 +43,60 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
+    firstName: "",
+    lastName:"",
     email: "",
     password: "",
-    agreeToTerms: false,
+    password_confirm: "",
+    // agreeToTerms: false,
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const registerMutation = useMutation({
+    mutationFn: authApi.register,
+    onSuccess: (data) => {
+      // Typically, Django returns tokens upon registration too
+      localStorage.setItem('access_token', data.access);
+      localStorage.setItem('refresh_token', data.refresh);
+
+      toast.success("Account created!", {
+        description: "Welcome to Acta. Please signin to get started!",
+      });
+      navigate("/auth/signin");
+    },
+    onError: (error: any) => {
+      // Handle Django validation errors (e.g., "Email already exists")
+      const backendErrors = error.response?.data;
+      const message = backendErrors ? Object.values(backendErrors).flat()[0] : "Registration failed";
+      toast.error("Error", { description: String(message) });
+    }
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.agreeToTerms) {
-      toast.error("Please agree to the terms and conditions");
-      return;
-    }
+    // 1. Client-side checks
+    // if (!formData.agreeToTerms) {
+    //   toast.error("Please agree to the terms and conditions");
+    //   return;
+    // }
 
     const allRequirementsMet = passwordRequirements.every((req) =>
-      req.test(formData.password),
+      req.test(formData.password)
     );
+    
     if (!allRequirementsMet) {
       toast.error("Please meet all password requirements");
       return;
     }
 
-    setIsLoading(true);
-
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    toast.success("Account created!", {
-      description: "Welcome to Acta. Let's get started!",
+    // 2. Fire the mutation
+    registerMutation.mutate({
+      first_name: formData.firstName, 
+      last_name:formData.lastName,// Adjust keys to match Django's expected field names
+      email: formData.email,
+      password: formData.password,
+      password_confirm: formData.password_confirm,
     });
-
-    setIsLoading(false);
-    navigate("/dashboard");
   };
 
   return (
@@ -97,7 +120,7 @@ const Register = () => {
             <span className="text-2xl font-bold text-foreground">Acta</span>
           </Link>
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3">
+          <Link to="/" className="hidden lg:flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
               <Waves className="w-6 h-6 text-accent" />
             </div>
@@ -118,17 +141,35 @@ const Register = () => {
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="fullName">Full name</Label>
+                <Label htmlFor="firstName">First name</Label>
                 <div className="relative">
                   <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
-                    id="fullName"
+                    id="firstName"
                     type="text"
                     placeholder="John Doe"
                     className="pl-10 h-12"
-                    value={formData.fullName}
+                    value={formData.firstName}
                     onChange={(e) =>
-                      setFormData({ ...formData, fullName: e.target.value })
+                      setFormData({ ...formData, firstName: e.target.value })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last name</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                  <Input
+                    id="lastName"
+                    type="text"
+                    placeholder="Last name"
+                    className="pl-10 h-12"
+                    value={formData.lastName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, lastName: e.target.value })
                     }
                     required
                   />
@@ -153,7 +194,7 @@ const Register = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <Label htmlFor="password">Password</Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -181,6 +222,37 @@ const Register = () => {
                   </button>
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="password">Confirm Password</Label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="password_confirm"
+                      type={showPassword ? "text" : "password_confirm"}
+                      placeholder="••••••••"
+                      className="pl-10 pr-10 h-12"
+                      value={formData.password_confirm}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password_confirm: e.target.value })
+                      }
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="w-5 h-5" />
+                      ) : (
+                        <Eye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+
+
                 {/* Password requirements */}
                 <div className="grid grid-cols-2 gap-2 pt-2">
                   {passwordRequirements.map((req) => {
@@ -189,7 +261,7 @@ const Register = () => {
                       <div
                         key={req.id}
                         className={`flex items-center gap-2 text-xs transition-colors ${
-                          isMet ? "text-accent" : "text-muted-foreground"
+                          isMet ? "text-gray-600" : "text-red-600"
                         }`}
                       >
                         <div
@@ -211,7 +283,7 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-2">
+            {/* <div className="flex items-start gap-2">
               <Checkbox
                 id="terms"
                 checked={formData.agreeToTerms}
@@ -233,14 +305,14 @@ const Register = () => {
                   Privacy Policy
                 </Link>
               </Label>
-            </div>
+            </div> */}
 
             <Button
               type="submit"
               className="w-full h-12 text-base font-semibold group"
-              disabled={isLoading}
+              disabled={registerMutation.isPending}
             >
-              {isLoading ? (
+              {registerMutation.isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-5 h-5 border-2 border-primary-foreground/30 border-t-primary-foreground rounded-full animate-spin" />
                   Creating account...

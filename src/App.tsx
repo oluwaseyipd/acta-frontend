@@ -22,6 +22,7 @@ import NotFound from "./pages/NotFound";
 // Dashboard Pages
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import DashboardOverview from "./pages/dashboard/Overview";
+import Inbox from "./pages/dashboard/Inbox";
 import Tasks from "./pages/dashboard/Tasks";
 import Today from "./pages/dashboard/Today";
 import Completed from "./pages/dashboard/Completed";
@@ -30,6 +31,7 @@ import Analytics from "./pages/dashboard/Analytics"
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
 import Register from "./pages/auth/Register";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -59,13 +61,17 @@ const App = () => {
               // Authentication Routes
               <Route path="/auth/register" element={<Register />} />
               <Route path="/auth/signin" element={<SignIn />} />
+
               // Dashboard Routes
-              <Route path="/dashboard" element={<DashboardLayout />}>
-                <Route index element={<DashboardOverview />} />
-                <Route path="today" element={<Today />} />
-                <Route path="tasks" element={<Tasks />} />
-                <Route path="completed" element={<Completed />} />
-                <Route path="analytics" element={<Analytics />} />
+              <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<DashboardLayout />}>
+                    <Route index element={<DashboardOverview />} />
+                    <Route path="inbox" element={<Inbox />} />
+                    <Route path="today" element={<Today />} />
+                    <Route path="tasks" element={<Tasks />} />
+                    <Route path="completed" element={<Completed />} />
+                    <Route path="analytics" element={<Analytics />} />
+                  </Route>
               </Route>
               ;
               <Route path="*" element={<NotFound />} />

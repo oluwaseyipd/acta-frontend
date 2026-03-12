@@ -8,6 +8,7 @@ import { PriorityPieChart } from "@/components/analytics/PriorityPieChart";
 import { ActivityHeatmap } from "@/components/analytics/ActivityHeatmap";
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
+import PageLoading from "@/components/dashboard/PageLoading";
 
 export default function Analytics() {
   const [range, setRange] = useState<number>(7);
@@ -19,7 +20,7 @@ export default function Analytics() {
 
 
   
-  const tasks = data ?? [];
+ const tasks = Array.isArray(data) ? data : (data?.results ?? []);
 
   // --- 1. Basic Stats ---
   const total = tasks.length;
@@ -65,13 +66,7 @@ export default function Analytics() {
   return streak;
 }, [tasks]);
 
-    if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <p>Loading tasks...</p>
-      </div>
-    );
-  }
+  if (isLoading) return <PageLoading />;
 
 
   return (

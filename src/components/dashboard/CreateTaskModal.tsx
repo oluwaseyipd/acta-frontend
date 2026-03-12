@@ -2,8 +2,11 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CalendarIcon, Clock } from "lucide-react";
+import { CalendarIcon, Clock, Loader2 } from "lucide-react";
 import { format, isToday } from "date-fns";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+// UI Components
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,29 +38,34 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+
+// Utilities & API
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { taskApi } from "@/api/tasks";
 
+/**
+ * Validation Schema
+ */
 const taskSchema = z.object({
   title: z.string().min(1, "Title is required").max(100, "Title is too long"),
   description: z.string().max(500, "Description is too long").optional(),
+  category: z.string().max(50, "Category name is too long").optional(),
   priority: z.enum(["low", "medium", "high"]),
-  dueDate: z.date().optional(),
-  dueTime: z.string().optional(),
+  due_date: z.date().optional(),
+  due_time: z.string().optional(),
 }).refine((data) => {
-  // If no date or no time is picked, skip the "past check"
-  if (!data.dueDate || !data.dueTime) return true;
+  if (!data.due_date || !data.due_time) return true;
 
   const now = new Date();
-  const selectedDateTime = new Date(data.dueDate);
-  const [hours, minutes] = data.dueTime.split(":").map(Number);
+  const selectedDateTime = new Date(data.due_date);
+  const [hours, minutes] = data.due_time.split(":").map(Number);
   selectedDateTime.setHours(hours, minutes, 0, 0);
 
-  // Validation: Must be in the future
   return selectedDateTime > now;
 }, {
   message: "Selected time has already passed",
-  path: ["dueTime"],
+  path: ["due_time"],
 });
 
 type TaskFormValues = z.infer<typeof taskSchema>;
@@ -68,7 +76,6 @@ interface CreateTaskModalProps {
   defaultDate?: Date;
 }
 
-// Generate time options in 30-minute intervals
 const generateTimeOptions = () => {
   const options = [];
   for (let h = 0; h < 24; h++) {
@@ -92,48 +99,80 @@ export function CreateTaskModal({
   onOpenChange,
   defaultDate,
 }: CreateTaskModalProps) {
+  const queryClient = useQueryClient();
+
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: {
       title: "",
       description: "",
       priority: "medium",
-      dueDate: defaultDate,
-      dueTime: "",
+      due_date: defaultDate,
+      category: "",
+      due_time: "",
     },
   });
 
-  // Update form when defaultDate changes
   React.useEffect(() => {
     if (defaultDate) {
-      form.setValue("dueDate", defaultDate);
+      form.setValue("due_date", defaultDate);
     }
   }, [defaultDate, form]);
 
+  /**
+   * API Mutation Logic with Combined ISO DateTime
+   */
+  const { mutate, isPending } = useMutation({
+    mutationFn: async (values: TaskFormValues) => {
+      
+       let combinedISOString = null;
+        if (values.due_date && values.due_time) {
+          const dateCopy = new Date(values.due_date);
+          const [hours, minutes] = values.due_time.split(":").map(Number);
+          dateCopy.setHours(hours, minutes, 0, 0);
+          combinedISOString = dateCopy.toISOString(); // "2023-10-27T14:30:00.000Z"
+        }
+ 
+      const payload = {
+        title: values.title,
+        description: values.description,
+        category: values.category,
+        priority: values.priority,
+        due_date: combinedISOString, 
+      };
+
+
+    return await taskApi.create(payload);// Authenticated via axios interceptor
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Refresh Inbox
+      toast.success("Task created successfully!");
+      form.reset();
+      onOpenChange(false);
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.detail || "Failed to create task";
+      toast.error(message);
+    },
+  });
+
   const onSubmit = (data: TaskFormValues) => {
-    console.log("Task data:", data);
-    toast.success("Task created successfully!", {
-      description: `"${data.title}" has been added to your tasks.`,
-    });
-    form.reset();
-    onOpenChange(false);
+    mutate(data);
   };
 
-const selectedDate = form.watch("dueDate");
+  const selectedDate = form.watch("due_date");
 
+  const filteredTimeOptions = React.useMemo(() => {
+    if (!selectedDate || !isToday(selectedDate)) return timeOptions;
 
-const filteredTimeOptions = React.useMemo(() => {
-  if (!selectedDate || !isToday(selectedDate)) return timeOptions;
+    const now = new Date();
+    const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const now = new Date();
-  const currentTotalMinutes = now.getHours() * 60 + now.getMinutes();
-
-  return timeOptions.filter((option) => {
-    const [h, m] = option.value.split(":").map(Number);
-    return (h * 60 + m) > currentTotalMinutes;
-  });
-}, [selectedDate]);
-
+    return timeOptions.filter((option) => {
+      const [h, m] = option.value.split(":").map(Number);
+      return (h * 60 + m) > currentTotalMinutes;
+    });
+  }, [selectedDate]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,7 +180,7 @@ const filteredTimeOptions = React.useMemo(() => {
         <DialogHeader>
           <DialogTitle>New Task</DialogTitle>
           <DialogDescription>
-            Fill in the details for your new task
+            Fill in the details for your new task.
           </DialogDescription>
         </DialogHeader>
 
@@ -183,37 +222,52 @@ const filteredTimeOptions = React.useMemo(() => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select priority" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {/* Date and Time Row */}
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
-                name="dueDate"
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Work, Home, etc." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="due_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Due Date</FormLabel>
@@ -236,17 +290,17 @@ const filteredTimeOptions = React.useMemo(() => {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            // Disables all days before today
-                            disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                            initialFocus
-                            className={cn("p-3 pointer-events-auto")}
-                          />
-                        </PopoverContent>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date(new Date().setHours(0, 0, 0, 0))
+                          }
+                          initialFocus
+                        />
+                      </PopoverContent>
                     </Popover>
                     <FormMessage />
                   </FormItem>
@@ -255,7 +309,7 @@ const filteredTimeOptions = React.useMemo(() => {
 
               <FormField
                 control={form.control}
-                name="dueTime"
+                name="due_time"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Due Time</FormLabel>
@@ -269,7 +323,7 @@ const filteredTimeOptions = React.useMemo(() => {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-60">
-                       {filteredTimeOptions.length > 0 ? (
+                        {filteredTimeOptions.length > 0 ? (
                           filteredTimeOptions.map((time) => (
                             <SelectItem key={time.value} value={time.value}>
                               {time.label}
@@ -277,7 +331,7 @@ const filteredTimeOptions = React.useMemo(() => {
                           ))
                         ) : (
                           <div className="p-2 text-xs text-center text-muted-foreground italic">
-                            No more available times for today
+                            No more times today
                           </div>
                         )}
                       </SelectContent>
@@ -294,11 +348,19 @@ const filteredTimeOptions = React.useMemo(() => {
                 variant="outline"
                 className="flex-1"
                 onClick={() => onOpenChange(false)}
+                disabled={isPending}
               >
                 Cancel
               </Button>
-              <Button type="submit" className="flex-1">
-                Create Task
+              <Button type="submit" className="flex-1" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Task"
+                )}
               </Button>
             </div>
           </form>
