@@ -24,7 +24,7 @@ apiClient.interceptors.request.use(
   (error) => {
     return Promise.reject(error);
   }
-);
+); 
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
@@ -72,7 +72,7 @@ export const endpoints = {
   register: '/auth/register/',
   logout: '/auth/logout/',
   refresh: '/auth/refresh/',
-  profile: '/auth/profile/',
+  profile: '/users/profile/',
   
   // Tasks
   tasks: '/tasks/',

@@ -7,11 +7,20 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"; /
 import { taskApi } from "@/api/tasks"; // 
 import { format, isToday, parseISO } from "date-fns";
 import PageLoading  from '../../components/dashboard/PageLoading';
+import { profileApi } from "@/lib/profile";
 
 export default function DashboardOverview() {
   const queryClient = useQueryClient();
 
-  // 1. Fetch the data
+  // Fetch User Profile
+  const { data: user } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: profileApi.getProfile,
+  });
+
+  const username = user?.first_name || user?.email?.split('@')[0] || "User";
+
+  // 1. Fetch the tasks
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks"],
     queryFn: taskApi.getAll,
@@ -64,7 +73,7 @@ const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-foreground">Welcome back!</h1>
+        <h1 className="text-3xl font-bold text-foreground">Welcome back, {username}!</h1>
         <p className="text-muted-foreground mt-1">Here's what's happening today.</p>
       </div>
 

@@ -14,10 +14,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { profileApi } from "@/lib/profile";
+
 
 export function TopBar() {
   const { setCommandPaletteOpen, setColorMode, colorMode } = useUIStore();
   const { setTheme, theme } = useTheme();
+
+  // Get username and email from currently logged in user. Create an avater with the first two letters of the username.
+    const { data: user } = useQuery({
+      queryKey: ["currentUser"],
+      queryFn: () => profileApi.getProfile(),
+    });
+
+    const initials = (
+    (user?.first_name?.slice(0,1) || "") + 
+    (user?.last_name?.slice(0,1) || "")
+  ).toUpperCase() || "??";
+
+  
 
   // Keyboard shortcut for command palette
   useEffect(() => {
@@ -36,6 +52,9 @@ export function TopBar() {
     setColorMode(mode);
     setTheme(mode);
   };
+
+
+
 
   return (
     <motion.header
@@ -109,9 +128,10 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src="/placeholder.svg" alt="User" />
+                <AvatarImage src={user?.avatar} alt={user?.first_name} />
+
                 <AvatarFallback className="bg-primary text-primary-foreground">
-                  TT
+                  {initials}
                 </AvatarFallback>
               </Avatar>
             </Button>
@@ -119,8 +139,8 @@ export function TopBar() {
           <DropdownMenuContent align="end" className="w-56 glass">
             <DropdownMenuLabel>
               <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">Acta User</p>
-                <p className="text-xs text-muted-foreground">user@Acta.app</p>
+                <p className="text-sm font-medium">{user?.first_name}</p>
+                <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
