@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { Search, Command, Bell, Moon, Sun, Monitor } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Search, Command, Bell, Moon, Sun, Monitor} from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -128,7 +129,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-                <AvatarImage src={user?.avatar} alt={user?.first_name} />
+               <AvatarImage src={user?.avatar} alt={user?.first_name} />
 
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {initials}
@@ -143,10 +144,19 @@ export function TopBar() {
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
+<DropdownMenuSeparator />
+<DropdownMenuItem asChild>
+  <Link to="profile" className="w-full cursor-pointer">
+    Profile
+  </Link>
+</DropdownMenuItem>
+
+<DropdownMenuItem asChild>
+  <Link to="settings" className="w-full cursor-pointer">
+    Settings
+  </Link>
+</DropdownMenuItem>
+<DropdownMenuSeparator />
             <DropdownMenuItem className="text-destructive">
               Log out
             </DropdownMenuItem>

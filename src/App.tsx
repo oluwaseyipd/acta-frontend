@@ -27,6 +27,7 @@ import Tasks from "./pages/dashboard/Tasks";
 import Today from "./pages/dashboard/Today";
 import Completed from "./pages/dashboard/Completed";
 import Analytics from "./pages/dashboard/Analytics"
+import Profile from "./pages/dashboard/Profile";
 
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
@@ -71,6 +72,7 @@ const App = () => {
                     <Route path="tasks" element={<Tasks />} />
                     <Route path="completed" element={<Completed />} />
                     <Route path="analytics" element={<Analytics />} />
+                    <Route path="profile" element={<Profile />} />
                   </Route>
               </Route>
               ;
