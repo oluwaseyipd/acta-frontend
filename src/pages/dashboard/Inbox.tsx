@@ -91,7 +91,7 @@ export default function Inbox() {
     },
   });
 
-  // --- Data Processing ---
+// --- Data Processing ---
   const { undatedTasks, datedGroups, sortedDates, totalCount } = useMemo(() => {
     const allTasks: Task[] = Array.isArray(data) ? data : (data?.results ?? []);
 
@@ -109,8 +109,11 @@ export default function Inbox() {
       if (!task.due_date) {
         undated.push(task);
       } else {
-        if (!dated[task.due_date]) dated[task.due_date] = [];
-        dated[task.due_date].push(task);
+        // NORMALIZATION: Split the ISO string to get only the YYYY-MM-DD part
+        const dateKey = task.due_date.split("T")[0]; 
+        
+        if (!dated[dateKey]) dated[dateKey] = [];
+        dated[dateKey].push(task);
       }
     });
 
