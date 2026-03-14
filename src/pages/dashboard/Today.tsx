@@ -9,12 +9,10 @@ import { format, isToday, isBefore, startOfDay } from "date-fns";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import PageLoading from "@/components/dashboard/PageLoading";
 
-import { 
-  useQuery,
-  useMutation, 
-  useQueryClient
-} from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskApi } from "@/api/tasks";
+import { extractTime } from "@/components/utils/date-utils";
+
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "in_progress" | "completed";
@@ -25,9 +23,9 @@ interface Task {
   description: string;
   priority: Priority;
   status: Status;
-  createdAt: string;
-  dueDate: string;
-  dueTime?: string;
+  created_at: string;
+  due_date: string;
+  due_time?: string;
 }
 
 const priorityColors = {
@@ -49,7 +47,7 @@ export default function Today() {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
 
-   // 2. All TanStack Hooks
+  // 2. All TanStack Hooks
   const queryClient = useQueryClient();
   const { playPop } = usePopSound();
 
@@ -59,13 +57,14 @@ export default function Today() {
   });
 
   const toggleMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: Status }) => 
+    mutationFn: ({ id, status }: { id: string; status: Status }) =>
       taskApi.update(id, { status }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tasks"] }),
   });
 
   const updateTaskMutation = useMutation({
-    mutationFn: (updatedTask: Task) => taskApi.update(updatedTask.id, updatedTask),
+    mutationFn: (updatedTask: Task) =>
+      taskApi.update(updatedTask.id, updatedTask),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Task updated!");
@@ -77,16 +76,15 @@ export default function Today() {
     updateTaskMutation.mutate(updatedTask);
   };
 
-    const handleTaskClick = (task: Task) => {
+  const handleTaskClick = (task: Task) => {
     setSelectedTask(task);
     setDetailModalOpen(true);
   };
 
-
   const handleToggleComplete = useCallback(
     (taskId: string) => {
-     const tasksArray = Array.isArray(data) ? data : (data?.results ?? []);
-    const task = tasksArray.find((t: any) => t.id === taskId);
+      const tasksArray = Array.isArray(data) ? data : (data?.results ?? []);
+      const task = tasksArray.find((t: any) => t.id === taskId);
       if (!task) return;
 
       const wasCompleted = task.status === "completed";
@@ -106,7 +104,8 @@ export default function Today() {
           toast.success("Task completed!", {
             action: {
               label: "UNDO",
-              onClick: () => toggleMutation.mutate({ id: taskId, status: "todo" }),
+              onClick: () =>
+                toggleMutation.mutate({ id: taskId, status: "todo" }),
             },
           });
         }, 400);
@@ -114,39 +113,43 @@ export default function Today() {
         toggleMutation.mutate({ id: taskId, status: "todo" });
       }
     },
-    [data, playPop, toggleMutation]
+    [data, playPop, toggleMutation],
   );
 
+  // 5. Data Filtering Logic
+  const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
+  const now = new Date();
+  const todayStart = startOfDay(now);
 
-// 5. Data Filtering Logic
-const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
-const now = new Date();
-const todayStart = startOfDay(now);
+  // Helper to handle both 'dueDate' and 'due_date' depending on your API serializer
+  const getTaskDate = (task: any) =>
+    startOfDay(new Date(task.due_date || task.dueDate));
 
-// Helper to handle both 'dueDate' and 'due_date' depending on your API serializer
-const getTaskDate = (task: any) => startOfDay(new Date(task.due_date || task.dueDate));
+  const todayTasks = allTasks.filter((task) => {
+    const taskDate = getTaskDate(task);
+    return (
+      isToday(taskDate) &&
+      task.status !== "completed" &&
+      !completingTasks.has(task.id)
+    );
+  });
 
-const todayTasks = allTasks.filter((task) => {
-  const taskDate = getTaskDate(task);
-  return (
-    isToday(taskDate) &&
-    task.status !== "completed" &&
-    !completingTasks.has(task.id)
-  );
-});
-
-const overdueTasks = allTasks.filter((task) => {
-  const taskDate = getTaskDate(task);
-  return (
-    isBefore(taskDate, todayStart) &&
-    task.status !== "completed" &&
-    !completingTasks.has(task.id)
-  );
-});
+  const overdueTasks = allTasks.filter((task) => {
+    const taskDate = getTaskDate(task);
+    return (
+      isBefore(taskDate, todayStart) &&
+      task.status !== "completed" &&
+      !completingTasks.has(task.id)
+    );
+  });
   if (isLoading) return <PageLoading />;
 
-
-  if (error) return <div className="flex items-center justify-center h-full"><p className="text-destructive">Error loading tasks</p></div>;
+  if (error)
+    return (
+      <div className="flex items-center justify-center h-full">
+        <p className="text-destructive">Error loading tasks</p>
+      </div>
+    );
 
   const formatTime = (timeStr?: string) => {
     if (!timeStr) return "";
@@ -165,93 +168,88 @@ const overdueTasks = allTasks.filter((task) => {
     }
   };
 
+  //Truncate long descriptions for better card display
+  const truncateDescription = (text: string, maxWords: number = 10) => {
+    if (!text) return "No description provided.";
+    const words = text.split(" ");
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
+  };
+
   const TaskCard = ({
     task,
     isOverdue = false,
   }: {
     task: Task;
     isOverdue?: boolean;
-  }) => (
-    <motion.div
-      key={task.id}
-      initial={{ opacity: 0, x: -20 }}
-      animate={{
-        opacity: completingTasks.has(task.id) ? 0 : 1,
-        x: completingTasks.has(task.id) ? -100 : 0,
-      }}
-      exit={{ opacity: 0, x: -100 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className={cn(
-        "p-4 rounded-xl bg-card border shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer",
-        isOverdue
-          ? "border-destructive/30 hover:border-destructive/50"
-          : "border-border hover:border-primary/20",
-      )}
-      onClick={() => handleTaskClick(task)}
-    >
-      <div className="flex items-start gap-4">
-        <Checkbox
-          checked={task.status === "completed"}
-          onCheckedChange={() => handleToggleComplete(task.id)}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1 h-5 w-5"
-        />
+  }) => {
+    const time = extractTime(task.due_date);
+    return (
+      <motion.div
+        key={task.id}
+        initial={{ opacity: 0, x: -20 }}
+        animate={{
+          opacity: completingTasks.has(task.id) ? 0 : 1,
+          x: completingTasks.has(task.id) ? -100 : 0,
+        }}
+        exit={{ opacity: 0, x: -100 }}
+        transition={{ duration: 0.35, ease: "easeOut" }}
+        className={cn(
+          "p-4 rounded-xl bg-card border shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer",
+          isOverdue
+            ? "border-destructive/30 hover:border-destructive/50"
+            : "border-border hover:border-primary/20",
+        )}
+        onClick={() => handleTaskClick(task)}
+      >
+        <div className="flex items-start gap-4">
+          <Checkbox
+            checked={task.status === "completed"}
+            onCheckedChange={() => handleToggleComplete(task.id)}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-1 h-5 w-5"
+          />
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-4">
-            <div className="space-y-1 flex-1">
-              <h3
-                className={cn(
-                  "font-semibold transition-all",
-                  task.status === "completed" &&
-                    "line-through text-muted-foreground",
-                )}
-              >
-                {task.title}
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                {task.description}
-              </p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1 flex-1">
+                <h3
+                  className={cn(
+                    "font-semibold transition-all",
+                    task.status === "completed" &&
+                      "line-through text-muted-foreground",
+                  )}
+                >
+                  {task.title}
+                </h3>
+                <p className="text-sm text-muted-foreground">
+                  {truncateDescription(task.description)}
+                </p>
 
-              <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                {isOverdue && (
-                  <span className="flex items-center gap-1 text-destructive">
-                    <Calendar className="h-3 w-3" />
-                    Due: {formatDate(task.dueDate)}
+                {/* Time & Status */}
+                <div className="flex flex-row justify-between gap-2 mt-2 text-xs text-muted-foreground">
+                  {time && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatTime(time)}
+                    </span>
+                  )}
+                  <span
+                    className={cn(
+                      "mt-2 inline-block px-2 py-0.5 text-xs rounded border capitalize",
+                      priorityColors[task.priority],
+                    )}
+                  >
+                    {task.priority}
                   </span>
-                )}
-                {task.dueTime && (
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    {formatTime(task.dueTime)}
-                  </span>
-                )}
+                </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <span
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md border capitalize",
-                  priorityColors[task.priority],
-                )}
-              >
-                {task.priority}
-              </span>
-              <span
-                className={cn(
-                  "px-2 py-1 text-xs rounded-md capitalize",
-                  statusColors[task.status],
-                )}
-              >
-                {task.status.replace("_", " ")}
-              </span>
             </div>
           </div>
         </div>
-      </div>
-    </motion.div>
-  );
+      </motion.div>
+    );
+  };
 
   return (
     <motion.div

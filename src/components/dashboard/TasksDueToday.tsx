@@ -9,6 +9,7 @@ import { format, parseISO, isToday } from "date-fns";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskApi } from "@/api/tasks";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
+import { extractTime } from "../utils/date-utils";
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "in_progress" | "completed";
@@ -21,7 +22,6 @@ interface Task {
   status: Status;
   createdAt: string;
   due_date: string;
-  due_time?: string;
 }
 
 const priorityColors = {
@@ -76,9 +76,11 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
       (taskId: string) => {
         const tasksArray = Array.isArray(data) ? data : (data?.results ?? []);
         const task = tasksArray.find((t: any) => t.id === taskId);
+        
         if (!task) return;
 
         const wasCompleted = task.status === "completed";
+        
 
         if (!wasCompleted) {
           setCompletingTasks((prev) => new Set(prev).add(taskId));
@@ -118,6 +120,8 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
       });
     }, [tasks, completingTasks]);
 
+
+
     // Formatters
     const formatTime = (timeStr?: string) => {
       if (!timeStr) return "";
@@ -150,7 +154,10 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
             </div>
           ) : (
             <AnimatePresence mode="popLayout">
-              {filteredTasks.map((task) => (
+              {filteredTasks.map((task) =>{
+                const time = extractTime(task.due_date); 
+
+                return(
                 <motion.div
                   key={task.id}
                   layout
@@ -190,10 +197,10 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
                           )}
 
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                            {task.due_time && (
+                            {time && (
                               <span className="flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                {formatTime(task.due_time)}
+                                {formatTime(time)}
                               </span>
                             )}
                             <span
@@ -210,7 +217,7 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              )})}
             </AnimatePresence>
           )}
         </div>

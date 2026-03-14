@@ -73,6 +73,7 @@ export const endpoints = {
   logout: '/auth/logout/',
   refresh: '/auth/refresh/',
   profile: '/users/profile/',
+  categories: '/categories/',
   
   // Tasks
   tasks: '/tasks/',

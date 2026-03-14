@@ -2,7 +2,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CalendarIcon, Clock, Loader2 } from "lucide-react";
+import { CalendarIcon, Clock, Loader2, Plus } from "lucide-react";
 import { format, isToday } from "date-fns";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -43,30 +43,44 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { taskApi } from "@/api/tasks";
+import { profileApi } from "@/lib/profile";
+import { categoryApi } from "@/lib/categories";
+import { useCategories } from "@/hooks/useCategories";
+import { useQuery } from "@tanstack/react-query";
 
 /**
  * Validation Schema
  */
-const taskSchema = z.object({
-  title: z.string().min(1, "Title is required").max(100, "Title is too long"),
-  description: z.string().max(500, "Description is too long").optional(),
-  category: z.string().max(50, "Category name is too long").optional(),
-  priority: z.enum(["low", "medium", "high"]),
-  due_date: z.date().optional(),
-  due_time: z.string().optional(),
-}).refine((data) => {
-  if (!data.due_date || !data.due_time) return true;
+const taskSchema = z
+  .object({
+    title: z.string().min(1, "Title is required").max(100, "Title is too long"),
+    description: z.string().max(500, "Description is too long").optional(),
+    category: z.string().max(50, "Category name is too long").optional(),
+    priority: z.enum(["low", "medium", "high"]),
+    due_date: z.date().optional(),
+    due_time: z.string().optional(),
+  })
+  .refine(
+    (data) => {
+      if (!data.due_date || !data.due_time) return true;
 
-  const now = new Date();
-  const selectedDateTime = new Date(data.due_date);
-  const [hours, minutes] = data.due_time.split(":").map(Number);
-  selectedDateTime.setHours(hours, minutes, 0, 0);
+      const now = new Date();
+      const selectedDateTime = new Date(data.due_date);
 
-  return selectedDateTime > now;
-}, {
-  message: "Selected time has already passed",
-  path: ["due_time"],
-});
+      if (data.due_time) {
+        const [hours, minutes] = data.due_time.split(":").map(Number);
+        selectedDateTime.setHours(hours, minutes, 0, 0);
+      } else {
+        // If no time is picked, we assume 11:59 PM, which is always in the future for today
+        selectedDateTime.setHours(23, 59, 59, 999);
+      }
+      return selectedDateTime > now;
+    },
+    {
+      message: "Selected time has already passed",
+      path: ["due_time"],
+    },
+  );
 
 type TaskFormValues = z.infer<typeof taskSchema>;
 
@@ -100,6 +114,15 @@ export function CreateTaskModal({
   defaultDate,
 }: CreateTaskModalProps) {
   const queryClient = useQueryClient();
+  const { data: categories, isLoading: isCatsLoading } = useCategories();
+  const [isAddingCategory, setIsAddingCategory] = React.useState(false);
+  const [newCatName, setNewCatName] = React.useState("");
+
+  // Fetch the current user to get their ID for task assignment
+  const { data: user } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: profileApi.getProfile,
+  });
 
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskSchema),
@@ -119,30 +142,78 @@ export function CreateTaskModal({
     }
   }, [defaultDate, form]);
 
+  // Mutation to add a new category immediately
+  const createCategoryMutation = useMutation({
+    mutationFn: (nameString: string) =>
+      categoryApi.createCategory({ name: nameString }),
+    onSuccess: (newCategory) => {
+      // Refresh the list so the new category appears
+      queryClient.invalidateQueries({ queryKey: ["categories"] });
+      // Automatically select the newly created category in the form
+      form.setValue("category", newCategory.id);
+      setIsAddingCategory(false);
+      setNewCatName("");
+      toast.success("Category added!");
+    },
+    onError: (error: any) => {
+      const serverMessage =
+        error.response?.data?.name?.[0] ||
+        error.response?.data?.non_field_errors?.[0] ||
+        "Failed to create category";
+      toast.error(serverMessage);
+    },
+  });
+
+  const handleAddCategory = () => {
+    const normalizedName = newCatName.trim();
+
+    // 1. Simple client-side check to see if name exists in current list
+    const exists = categories?.some(
+      (cat) => cat.name.toLowerCase() === normalizedName.toLowerCase(),
+    );
+
+    if (exists) {
+      toast.error("You already have a category with this name.");
+      return;
+    }
+
+    if (normalizedName) {
+      createCategoryMutation.mutate(normalizedName);
+    }
+  };
+
   /**
    * API Mutation Logic with Combined ISO DateTime
    */
   const { mutate, isPending } = useMutation({
     mutationFn: async (values: TaskFormValues) => {
-      
-       let combinedISOString = null;
-        if (values.due_date && values.due_time) {
-          const dateCopy = new Date(values.due_date);
+      let combinedISOString = null;
+
+      if (values.due_date) {
+        const dateCopy = new Date(values.due_date);
+
+        if (values.due_time) {
+          // User picked a specific time (e.g., 2:30 PM)
           const [hours, minutes] = values.due_time.split(":").map(Number);
           dateCopy.setHours(hours, minutes, 0, 0);
-          combinedISOString = dateCopy.toISOString(); // "2023-10-27T14:30:00.000Z"
+        } else {
+          // No time picked: Set to 11:59:59 PM to cover the full 24hrs
+          dateCopy.setHours(23, 59, 59, 999);
         }
- 
+          combinedISOString = dateCopy.toISOString().slice(0, 19) + "Z";
+      }
+
       const payload = {
         title: values.title,
-        description: values.description,
-        category: values.category,
+        description: values.description || "",
         priority: values.priority,
-        due_date: combinedISOString, 
+        status: "pending",
+        due_date: combinedISOString,
+        category: values.category || null,
+        assigned_to: user?.id, // Assign to current user by default
       };
 
-
-    return await taskApi.create(payload);// Authenticated via axios interceptor
+      return await taskApi.create(payload); // Authenticated via axios interceptor
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] }); // Refresh Inbox
@@ -157,6 +228,11 @@ export function CreateTaskModal({
   });
 
   const onSubmit = (data: TaskFormValues) => {
+    // 3. Optional: Guard against submitting if user isn't loaded yet
+    if (!user?.id) {
+      toast.error("Authentication required to create tasks.");
+      return;
+    }
     mutate(data);
   };
 
@@ -170,7 +246,7 @@ export function CreateTaskModal({
 
     return timeOptions.filter((option) => {
       const [h, m] = option.value.split(":").map(Number);
-      return (h * 60 + m) > currentTotalMinutes;
+      return h * 60 + m > currentTotalMinutes;
     });
   }, [selectedDate]);
 
@@ -223,20 +299,68 @@ export function CreateTaskModal({
             />
 
             <div className="grid grid-cols-2 gap-4">
+              {/* Left Column: Category */}
               <FormField
                 control={form.control}
                 name="category"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Category</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Work, Home, etc." {...field} />
-                    </FormControl>
+                    <div className="flex gap-2">
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="flex-1">
+                            <SelectValue
+                              placeholder={
+                                isCatsLoading ? "Loading..." : "Select"
+                              }
+                            />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {/* categories is now the array returned by getCategories */}
+                          {categories?.map((cat: any) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                          
+                          {categories?.length === 0 && !isCatsLoading && (
+                            <div className="p-2 text-xs text-center text-muted-foreground italic">
+                              No categories found.
+                            </div>
+                          )}
+                        </SelectContent>
+                      </Select>
+
+                      {/* Trigger Button beside the Select */}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => {
+                          setIsAddingCategory(!isAddingCategory);
+                          setNewCatName(""); // Clear name when closing
+                        }}
+                      >
+                        <Plus
+                          className={cn(
+                            "h-4 w-4 transition-transform",
+                            isAddingCategory && "rotate-45",
+                          )}
+                        />
+                      </Button>
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
+              {/* Right Column: Priority */}
               <FormField
                 control={form.control}
                 name="priority"
@@ -263,6 +387,48 @@ export function CreateTaskModal({
                 )}
               />
             </div>
+
+            {/* The Toggleable Inline Input - Appears right below the grid row */}
+            {isAddingCategory && (
+              <div className="mt-2 flex items-center gap-2 p-2 bg-muted/30 rounded-md border border-dashed animate-in fade-in slide-in-from-top-1">
+                <Input
+                  placeholder="New category name..."
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="h-8 text-sm"
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddCategory();
+                    }
+                  }}
+                />
+                <Button
+                  size="sm"
+                  className="h-8"
+                  onClick={handleAddCategory}
+                  disabled={createCategoryMutation.isPending}
+                >
+                  {createCategoryMutation.isPending ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    "Save"
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2"
+                  onClick={() => {
+                    setIsAddingCategory(false);
+                    setNewCatName("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField

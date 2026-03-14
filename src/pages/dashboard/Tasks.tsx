@@ -25,6 +25,19 @@ import { format } from "date-fns";
 import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
 import PageLoading from "@/components/dashboard/PageLoading";
+import { extractTime } from "../../components/utils/date-utils";
+
+
+const formatTime = (timeStr?: string) => {
+  if (!timeStr) return "";
+  const [hours, minutes] = timeStr.split(":");
+  const hour = parseInt(hours, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  const displayHour = hour % 12 || 12;
+  return `${displayHour}:${minutes} ${ampm}`;
+};
+
+
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "in_progress" | "completed";
@@ -111,12 +124,20 @@ export default function Tasks() {
   );
 
 
-  const groupedByDate = filteredTasks.reduce((acc, task) => {
-    const dateKey = task.dueDate;
+const groupedByDate = filteredTasks.reduce(
+  (acc, task) => {
+    // 1. Get the raw date string
+    const rawDate = task.due_date || task.dueDate;
+    
+    // 2. Normalize it: Take only the YYYY-MM-DD part
+    const dateKey = rawDate ? rawDate.split('T')[0] : "No Due Date";
+    
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(task);
     return acc;
-  }, {} as Record<string, Task[]>);
+  },
+  {} as Record<string, Task[]>,
+);
 
 
   const sortedDates = Object.keys(groupedByDate).sort(
@@ -164,11 +185,20 @@ export default function Tasks() {
 
 
   const formatColumnDate = (dateStr: string) => {
-    try {
-      return format(new Date(dateStr), "EEEE, MMM d, yyyy");
-    } catch {
-      return dateStr;
-    }
+  if (!dateStr) return "No Due Date"; // Handle undefined/empty strings
+  try {
+    return format(new Date(dateStr), "EEEE, MMM d, yyyy");
+  } catch {
+    return "Invalid Date";
+  }
+};
+
+  //Truncate long descriptions for better card display
+  const truncateDescription = (text: string, maxWords: number = 10) => {
+    if (!text) return "No description provided.";
+    const words = text.split(" ");
+    if (words.length <= maxWords) return text;
+    return words.slice(0, maxWords).join(" ") + "...";
   };
 
   const handleTaskClick = (task: Task, e: React.MouseEvent) => {
@@ -286,7 +316,9 @@ export default function Tasks() {
               </h3>
 
               <AnimatePresence mode="popLayout">
-                {groupedByDate[dateKey].map((task) => (
+                {groupedByDate[dateKey].map((task) => {
+                  const time = extractTime(task.due_date);
+                  return(
                   <motion.div
                     key={task.id}
                     initial={{ opacity: 0, x: -20 }}
@@ -329,16 +361,16 @@ export default function Tasks() {
                                 <Calendar className="h-3 w-3" />
                                 Created: {formatDate(task.createdAt)}
                               </span>
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                Due: {formatDate(task.dueDate)}{" "}
-                                {task.dueTime &&
-                                  `at ${formatTime(task.dueTime)}`}
-                              </span>
+                               {time && (
+                                                   <span className="flex items-center gap-1">
+                                                      <Clock className="h-3 w-3" />
+                                                        {formatTime(time)}
+                                                    </span>
+                                                   )}
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
+                          <div className="flex  items-center gap-2 shrink-0">
                             <span
                               className={cn(
                                 "px-2 py-1 text-xs rounded-md border capitalize",
@@ -347,20 +379,20 @@ export default function Tasks() {
                             >
                               {task.priority}
                             </span>
-                            <span
+                            {/* <span
                               className={cn(
                                 "px-2 py-1 text-xs rounded-md capitalize",
                                 statusColors[task.status],
                               )}
                             >
                               {task.status.replace("_", " ")}
-                            </span>
+                            </span> */}
                           </div>
                         </div>
                       </div>
                     </div>
                   </motion.div>
-                ))}
+                )})}
               </AnimatePresence>
 
               {/* Add Task Button */}
@@ -405,12 +437,14 @@ export default function Tasks() {
                 )}
               >
                 <AnimatePresence mode="popLayout">
-                  {groupedByDate[dateKey].map((task) => (
-                    <motion.div
-                      key={task.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{
-                        opacity: completingTasks.has(task.id) ? 0 : 1,
+                  {groupedByDate[dateKey].map((task) => {
+                    const time = extractTime(task.due_date);
+                    return (
+                      <motion.div
+                        key={task.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{
+                          opacity: completingTasks.has(task.id) ? 0 : 1,
                         x: completingTasks.has(task.id) ? -100 : 0,
                       }}
                       exit={{ opacity: 0, x: -100 }}
@@ -435,28 +469,18 @@ export default function Tasks() {
                             {task.title}
                           </h4>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {task.description}
+                            {truncateDescription(task.description)}
                           </p>
 
                           {/* Time & Status */}
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            {task.dueTime && (
-                              <span className="flex items-center gap-1">
-                                <Clock className="h-3 w-3" />
-                                {formatTime(task.dueTime)}
-                              </span>
-                            )}
-                            <span
-                              className={cn(
-                                "px-1.5 py-0.5 rounded capitalize",
-                                statusColors[task.status],
+                          <div className="flex flex-row justify-between gap-2 mt-2 text-xs text-muted-foreground">
+                              {time && (
+                                <span className="flex items-center gap-1">
+                                  <Clock className="h-3 w-3" />
+                                  {formatTime(time)}
+                                </span>
                               )}
-                            >
-                              {task.status.replace("_", " ")}
-                            </span>
-                          </div>
-
-                          <span
+                            <span
                             className={cn(
                               "mt-2 inline-block px-2 py-0.5 text-xs rounded border capitalize",
                               priorityColors[task.priority],
@@ -464,10 +488,13 @@ export default function Tasks() {
                           >
                             {task.priority}
                           </span>
+                          </div>
+
+                          
                         </div>
                       </div>
                     </motion.div>
-                  ))}
+                  )})}
                 </AnimatePresence>
               </div>
 

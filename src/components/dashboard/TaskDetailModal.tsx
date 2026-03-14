@@ -24,19 +24,20 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useCategories } from "@/hooks/useCategories";
+import React from "react";
+import { extractTime } from "../utils/date-utils";
 
 type Priority = "low" | "medium" | "high";
-type Status = "todo" | "in_progress" | "completed";
 
 interface Task {
   id: string;
   title: string;
   description: string;
   priority: Priority;
-  status: Status;
-  createdAt: string;
-  dueDate: string;
-  dueTime?: string;
+  category: string;
+  created_at: string;
+  due_date: string;
 }
 
 interface TaskDetailModalProps {
@@ -77,21 +78,31 @@ const generateTimeOptions = () => {
 
 const timeOptions = generateTimeOptions();
 
-export function TaskDetailModal({
-  task,
-  open,
-  onOpenChange,
-  onSave,
-}: TaskDetailModalProps) {
+export function TaskDetailModal({ task, open, onOpenChange, onSave, }: TaskDetailModalProps) {
   const [editingField, setEditingField] = useState<string | null>(null);
   const [editedTask, setEditedTask] = useState<Task | null>(null);
 
-  // Initialize edited task when task changes
-  if (task && (!editedTask || editedTask.id !== task.id)) {
+  const { data: categories, isLoading: isCatsLoading } = useCategories();
+
+  React.useEffect(() => {
+  if (task) {
     setEditedTask({ ...task });
   }
+}, [task]);
 
-  if (!task || !editedTask) return null;
+
+  // Helper to find the current category name for the display view
+
+const currentCategoryName = React.useMemo(() => {
+    if (!categories) return "Uncategorized";
+    const list = Array.isArray(categories) ? categories : categories.results;
+    // Standardize the list source from your paginated API
+    return list?.find((c: any) => c.id === editedTask?.category)?.name || "Uncategorized";
+  }, [categories, editedTask?.category])
+
+
+if (!task || !editedTask) return null;
+
 
   const handleFieldClick = (field: string) => {
     setEditingField(field);
@@ -116,14 +127,19 @@ export function TaskDetailModal({
     }
   };
 
-  const formatTime = (timeStr?: string) => {
-    if (!timeStr) return "No time set";
-    const [hours, minutes] = timeStr.split(":");
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
-  };
+
+  const formatTimeFromDate = (dateStr?: string) => {
+  if (!dateStr) return "No time set";
+
+  const date = new Date(dateStr);
+  const hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const displayHour = hours % 12 || 12;
+
+  return `${displayHour}:${minutes} ${ampm}`;
+};
 
   const EditableField = ({
     field,
@@ -210,80 +226,85 @@ export function TaskDetailModal({
             />
           </EditableField>
 
-          {/* Priority & Status Row */}
+          {/* Priority & Category */}
           <div className="grid grid-cols-2 gap-4">
-            <EditableField
-              field="priority"
-              label="Priority"
-              value={
-                <span
-                  className={cn(
-                    "px-3 py-1.5 text-sm rounded-lg border capitalize inline-block",
-                    priorityColors[editedTask.priority],
-                  )}
-                >
-                  {editedTask.priority}
-                </span>
-              }
-            >
-              <Select
-                value={editedTask.priority}
-                onValueChange={(val: Priority) =>
-                  setEditedTask({ ...editedTask, priority: val })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low</SelectItem>
-                  <SelectItem value="medium">Medium</SelectItem>
-                  <SelectItem value="high">High</SelectItem>
-                </SelectContent>
-              </Select>
-            </EditableField>
+  <EditableField
+    field="priority"
+    label="Priority"
+    value={
+      <span
+        className={cn(
+          "px-3 py-1.5 text-sm rounded-lg border capitalize inline-block",
+          priorityColors[editedTask.priority],
+        )}
+      >
+        {editedTask.priority}
+      </span>
+    }
+  >
+    <Select
+      value={editedTask.priority}
+      onValueChange={(val: Priority) =>
+        setEditedTask({ ...editedTask, priority: val })
+      }
+    >
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="low">Low</SelectItem>
+        <SelectItem value="medium">Medium</SelectItem>
+        <SelectItem value="high">High</SelectItem>
+      </SelectContent>
+    </Select>
+  </EditableField>
 
-            <EditableField
-              field="status"
-              label="Status"
-              value={
-                <span
-                  className={cn(
-                    "px-3 py-1.5 text-sm rounded-lg capitalize inline-block",
-                    statusColors[editedTask.status],
-                  )}
-                >
-                  {editedTask.status.replace("_", " ")}
-                </span>
-              }
-            >
-              <Select
-                value={editedTask.status}
-                onValueChange={(val: Status) =>
-                  setEditedTask({ ...editedTask, status: val })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todo">To Do</SelectItem>
-                  <SelectItem value="in_progress">In Progress</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                </SelectContent>
-              </Select>
-            </EditableField>
-          </div>
+  
+  <EditableField
+        field="category"
+        label="Category"
+        value={
+          <span className="px-3 py-1.5 text-sm rounded-lg border bg-secondary/30 inline-block">
+            {isCatsLoading ? "Loading..." : currentCategoryName}
+          </span>
+        }
+      >
+        <Select
+          value={editedTask.category || ""}
+          onValueChange={(val: string) =>
+            setEditedTask({ ...editedTask, category: val })
+          }
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select category" />
+          </SelectTrigger>
+          <SelectContent>
+            {/* Map through categories based on your API's paginated structure */}
+            {(Array.isArray(categories) ? categories : categories?.results)?.map((cat: any) => (
+              <SelectItem key={cat.id} value={cat.id}>
+                {cat.name}
+              </SelectItem>
+            ))}
+            
+            {(!categories || (Array.isArray(categories) ? categories.length : categories?.results?.length) === 0) && (
+              <div className="p-2 text-xs text-center text-muted-foreground italic">
+                No categories available
+              </div>
+            )}
+          </SelectContent>
+        </Select>
+      </EditableField>
+</div>
 
           {/* Due Date & Time Row */}
           <div className="grid grid-cols-2 gap-4">
             <EditableField
-              field="dueDate"
+              field="due_date"
               label="Due Date"
               value={
                 <span className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  {formatDate(editedTask.dueDate)}
+                  {formatDate(editedTask.due_date)}
                 </span>
               }
             >
@@ -291,18 +312,18 @@ export function TaskDetailModal({
                 <PopoverTrigger asChild>
                   <Button variant="outline" className="w-full justify-start">
                     <Calendar className="mr-2 h-4 w-4" />
-                    {formatDate(editedTask.dueDate)}
+                    {formatDate(editedTask.due_date)}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarPicker
                     mode="single"
-                    selected={new Date(editedTask.dueDate)}
+                    selected={new Date(editedTask.due_date)}
                     onSelect={(date) =>
                       date &&
                       setEditedTask({
                         ...editedTask,
-                        dueDate: format(date, "yyyy-MM-dd"),
+                        due_date: format(date, "yyyy-MM-dd"),
                       })
                     }
                     initialFocus
@@ -312,20 +333,28 @@ export function TaskDetailModal({
             </EditableField>
 
             <EditableField
-              field="dueTime"
+              field="due_time"
               label="Due Time"
               value={
                 <span className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
-                  {formatTime(editedTask.dueTime)}
+                  {formatTimeFromDate(editedTask.due_date)}
                 </span>
               }
             >
               <Select
-                value={editedTask.dueTime || ""}
-                onValueChange={(val) =>
-                  setEditedTask({ ...editedTask, dueTime: val })
-                }
+                value={extractTime(editedTask.due_date) || ""}
+                onValueChange={(val) => {
+                  const date = new Date(editedTask.due_date);
+                  const [hours, minutes] = val.split(":").map(Number);
+
+                  date.setHours(hours, minutes, 0, 0);
+
+                  setEditedTask({
+                    ...editedTask,
+                    due_date: date.toISOString(),
+                  });
+                }}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select time" />
@@ -347,7 +376,7 @@ export function TaskDetailModal({
               Created
             </label>
             <p className="p-2 text-sm text-muted-foreground">
-              {formatDate(editedTask.createdAt)}
+              {formatDate(editedTask.created_at)}
             </p>
           </div>
 
