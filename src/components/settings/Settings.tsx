@@ -11,8 +11,8 @@ import { toast } from 'sonner';
 
 export default function Settings() {
  const [profileForm, setProfileForm] = useState({
-   name: 'TaskTide User',
-   email: 'user@tasktide.app',
+   name: 'Acta User',
+   email: 'user@acta.app',
  });
 
 
@@ -50,7 +50,7 @@ export default function Settings() {
            <div className="flex items-center gap-6">
              <Avatar className="h-20 w-20 border-4 border-primary/20">
                <AvatarImage src="/placeholder.svg" />
-               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">TT</AvatarFallback>
+               <AvatarFallback className="text-2xl bg-primary text-primary-foreground">AC</AvatarFallback>
              </Avatar>
              <div>
                <h3 className="font-semibold text-lg">{profileForm.name}</h3>

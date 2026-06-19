@@ -36,7 +36,7 @@ export const sendEmail = async (data: EmailData): Promise<void> => {
       from_email: data.email,
       subject: data.subject,
       message: data.message,
-      to_name: 'TaskTide Team', // You can customize this
+      to_name: 'Acta Team', // You can customize this
       reply_to: data.email,
     };
 

@@ -20,6 +20,10 @@ interface UIState {
   commandPaletteOpen: boolean;
   setCommandPaletteOpen: (open: boolean) => void;
 
+  // Task Creation Modal
+  isCreateModalOpen: boolean;
+  setCreateModalOpen: (open: boolean) => void;
+
   // Theme
   themePreset: ThemePreset;
   setThemePreset: (preset: ThemePreset) => void;
@@ -44,6 +48,10 @@ export const useUIStore = create<UIState>()(
       commandPaletteOpen: false,
       setCommandPaletteOpen: (open) => set({ commandPaletteOpen: open }),
 
+      // Task Creation Modal
+      isCreateModalOpen: false,
+      setCreateModalOpen: (open) => set({ isCreateModalOpen: open }),
+
       // Theme
       themePreset: "midnight",
       setThemePreset: (preset) => set({ themePreset: preset }),
@@ -55,7 +63,7 @@ export const useUIStore = create<UIState>()(
       setTaskViewMode: (mode) => set({ taskViewMode: mode }),
     }),
     {
-      name: "tasktide-ui-storage",
+      name: "acta-ui-storage",
       partialize: (state) => ({
         sidebarCollapsed: state.sidebarCollapsed,
         themePreset: state.themePreset,

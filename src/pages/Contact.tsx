@@ -44,8 +44,8 @@ const contactInfo = [
     icon: Mail,
     title: "Email Us",
     description: "Our team is here to help.",
-    value: "hello@tasktide.app",
-    href: "mailto:hello@tasktide.app",
+    value: "hello@acta.app",
+    href: "mailto:hello@acta.app",
   },
   {
     icon: MapPin,
