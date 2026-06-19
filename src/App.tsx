@@ -33,14 +33,13 @@ import Profile from "./pages/dashboard/Profile";
 import SignIn from "./pages/auth/SignIn";
 import Register from "./pages/auth/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
-
 const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
     // Initialize EmailJS when app starts
     initEmailJS();
-  }, []);
+  }, []);  
 
   return (
     <ThemeProvider>

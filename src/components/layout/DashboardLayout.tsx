@@ -40,7 +40,6 @@ export function DashboardLayout() {
           </div>
         </motion.main>
       </div>
-
       <CommandPalette />
     </div>
   );

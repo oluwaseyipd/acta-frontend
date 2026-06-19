@@ -20,7 +20,9 @@ export default function Analytics() {
 
 
   
- const tasks = Array.isArray(data) ? data : (data?.results ?? []);
+  const tasks = useMemo(() => {
+    return Array.isArray(data) ? data : (data?.results ?? []);
+  }, [data]);
 
   // --- 1. Basic Stats ---
   const total = tasks.length;

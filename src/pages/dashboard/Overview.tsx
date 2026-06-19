@@ -42,13 +42,10 @@ export default function DashboardOverview() {
 const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
 
   // Logic for "Due Today" (Comparing task.due_date with today's date)
-  const todayStr = format(new Date(), "yyyy-MM-dd");
-  const tasksDueToday = allTasks.filter((t) => t.due_date === todayStr);
-
-  const todayTasksCount = allTasks.filter(t => 
-  t.due_date && isToday(parseISO(t.due_date)) && t.status !== "completed"
-).length;
-
+  const tasksDueToday = allTasks.filter((t) => {
+    const rawDate = t.due_date || t.dueDate;
+    return rawDate && isToday(parseISO(rawDate));
+  });
 
   // 4. Calculate Stats Dynamically
   const todayTotalTasks = tasksDueToday.length;
@@ -104,7 +101,7 @@ const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <DailyProgressRadial 
-           completed={completedTasks.length} 
+           completed={todayCompletedTasks.length} 
            total={todayTotalTasks} 
         />
         <div className="lg:col-span-2">
