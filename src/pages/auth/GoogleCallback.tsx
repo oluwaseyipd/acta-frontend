@@ -11,6 +11,8 @@ const GoogleCallback = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const code = searchParams.get("code");
+  const displayError = !code ? "No authorization code was returned from Google." : errorMessage;
 
   const googleAuthMutation = useMutation({
     mutationFn: authApi.googleCallback,
@@ -35,15 +37,10 @@ const GoogleCallback = () => {
   });
 
   useEffect(() => {
-    const code = searchParams.get("code");
-    if (!code) {
-      setErrorMessage("No authorization code was returned from Google.");
-      return;
+    if (code) {
+      googleAuthMutation.mutate(code);
     }
-
-    // Trigger the mutation to exchange authorization code for tokens
-    googleAuthMutation.mutate(code);
-  }, [searchParams]);
+  }, [code, googleAuthMutation]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
@@ -67,7 +64,7 @@ const GoogleCallback = () => {
           <span className="text-3xl font-extrabold tracking-tight">Acta</span>
         </Link>
 
-        {errorMessage ? (
+        {displayError ? (
           <div className="space-y-6 w-full">
             <div className="w-16 h-16 rounded-full bg-destructive/10 text-destructive flex items-center justify-center mx-auto">
               <AlertCircle className="w-8 h-8" />
@@ -75,7 +72,7 @@ const GoogleCallback = () => {
             <div className="space-y-2">
               <h2 className="text-xl font-bold text-foreground">Authentication Error</h2>
               <p className="text-sm text-muted-foreground leading-relaxed px-4">
-                {errorMessage}
+                {displayError}
               </p>
             </div>
             <Button

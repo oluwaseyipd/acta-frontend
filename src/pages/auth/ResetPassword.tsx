@@ -34,13 +34,8 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState<string | null>(null);
+  const token = searchParams.get("token");
   const [isSubmitted, setIsSubmitted] = useState(false);
-
-  useEffect(() => {
-    const tokenParam = searchParams.get("token");
-    setToken(tokenParam);
-  }, [searchParams]);
 
   const resetPasswordMutation = useMutation({
     mutationFn: ({ token, newPassword }: { token: string; newPassword: string }) =>
