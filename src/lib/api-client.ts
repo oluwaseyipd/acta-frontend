@@ -39,7 +39,7 @@ apiClient.interceptors.response.use(
       try {
         const refreshToken = localStorage.getItem('refresh_token');
         if (refreshToken) {
-          const response = await axios.post(`${API_BASE_URL}/auth/refresh/`, {
+          const response = await axios.post(`${API_BASE_URL}/auth/token/refresh/`, {
             refresh: refreshToken,
           });
           
@@ -71,8 +71,13 @@ export const endpoints = {
   signin: '/auth/login/',
   register: '/auth/register/',
   logout: '/auth/logout/',
-  refresh: '/auth/refresh/',
+  refresh: '/auth/token/refresh/',
   profile: '/users/profile/',
+  googleUrl: '/auth/google/url/',
+  googleCallback: '/auth/google/callback/',
+  forgotPassword: '/auth/password/reset/',
+  resetPassword: '/auth/password/reset/confirm/',
+  changePassword: '/auth/password/change/',
   categories: '/categories/',
   
   // Tasks

@@ -32,6 +32,9 @@ import Profile from "./pages/dashboard/Profile";
 // Authentication Pages
 import SignIn from "./pages/auth/SignIn";
 import Register from "./pages/auth/Register";
+import GoogleCallback from "./pages/auth/GoogleCallback";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+import ResetPassword from "./pages/auth/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoute";
 const queryClient = new QueryClient();
 
@@ -61,6 +64,9 @@ const App = () => {
               // Authentication Routes
               <Route path="/auth/register" element={<Register />} />
               <Route path="/auth/signin" element={<SignIn />} />
+              <Route path="/auth/google/callback" element={<GoogleCallback />} />
+              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
               // Dashboard Routes
               <Route element={<ProtectedRoute />}>

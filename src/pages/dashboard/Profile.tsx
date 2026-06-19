@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { profileApi } from "@/lib/profile";
+import { authApi } from "@/lib/auth";
 import PageLoading  from '../../components/dashboard/PageLoading';
 
 
@@ -34,6 +35,17 @@ const profileSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
+
+const passwordSchema = z.object({
+  old_password: z.string().min(1, "Current password is required"),
+  new_password: z.string().min(8, "New password must be at least 8 characters"),
+  new_password_confirm: z.string().min(8, "Confirm password must be at least 8 characters"),
+}).refine((data) => data.new_password === data.new_password_confirm, {
+  message: "Passwords do not match",
+  path: ["new_password_confirm"],
+});
+
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,6 +83,37 @@ export default function Profile() {
   useEffect(() => {
     if (user) reset(user);
   }, [user, reset]);
+
+  // 6. Password Change Form Setup
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    reset: resetPasswordForm,
+    formState: { errors: passwordErrors },
+  } = useForm<PasswordFormValues>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
+      old_password: "",
+      new_password: "",
+      new_password_confirm: "",
+    }
+  });
+
+  const { mutate: changePassword, isPending: isChangingPassword } = useMutation({
+    mutationFn: authApi.changePassword,
+    onSuccess: () => {
+      resetPasswordForm();
+      toast.success("Password updated successfully!");
+    },
+    onError: (error: any) => {
+      const detail = error.response?.data?.detail || error.response?.data?.non_field_errors?.[0] || "Failed to update password.";
+      toast.error("Update failed", { description: detail });
+    },
+  });
+
+  const onPasswordSubmit = (data: PasswordFormValues) => {
+    changePassword(data);
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,90 +229,149 @@ export default function Profile() {
         </div>
 
         {/* Right Column: Edit Forms */}
-        <form
-          onSubmit={handleSubmit(onSubmit)}
-          className="lg:col-span-2 space-y-6"
-        >
-          <section className="bg-white dark:bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-border bg-muted/30">
-              <h3 className="font-semibold">Personal Information</h3>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">First Name</label>
-                <Input {...register("first_name")} />
-                {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
+        <div className="lg:col-span-2 space-y-8">
+          <form
+            onSubmit={handleSubmit(onSubmit)}
+            className="space-y-6"
+          >
+            <section className="bg-white dark:bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-border bg-muted/30">
+                <h3 className="font-semibold">Personal Information</h3>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Last Name</label>
-                <Input {...register("last_name")} />
-                {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    {...register("email")}
-                    className="pl-10"
-                    readOnly
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">First Name</label>
+                  <Input {...register("first_name")} />
+                  {errors.first_name && <p className="text-xs text-red-500">{errors.first_name.message}</p>}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Last Name</label>
+                  <Input {...register("last_name")} />
+                  {errors.last_name && <p className="text-xs text-red-500">{errors.last_name.message}</p>}
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      {...register("email")}
+                      className="pl-10"
+                      readOnly
+                    />
+                    {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                  </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Bio</label>
+                  <Textarea
+                    {...register("bio")}
+                    placeholder="Tell us about yourself..."
+                    className="min-h-[100px]"
                   />
-                  {errors.email && <p className="text-xs text-red-500">{errors.email.message}</p>}
+                  {errors.bio && <p className="text-xs text-red-500">{errors.bio.message}</p>}
                 </div>
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium">Bio</label>
-                <Textarea
-                  {...register("bio")}
-                  placeholder="Tell us about yourself..."
-                  className="min-h-[100px]"
-                />
-                {errors.bio && <p className="text-xs text-red-500">{errors.bio.message}</p>}
-              </div>
-            </div>
-          </section>
+            </section>
 
-          <section className="bg-white dark:bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-border bg-muted/30">
-              <h3 className="font-semibold">Contact & Location</h3>
-            </div>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Phone Number</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input {...register("phone_number")} className="pl-10" />
-                  {errors.phone_number && <p className="text-xs text-red-500">{errors.phone_number.message}</p>}
+            <section className="bg-white dark:bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-border bg-muted/30">
+                <h3 className="font-semibold">Contact & Location</h3>
+              </div>
+              <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Phone Number</label>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input {...register("phone_number")} className="pl-10" />
+                    {errors.phone_number && <p className="text-xs text-red-500">{errors.phone_number.message}</p>}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Location</label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                    <Input {...register("location")} className="pl-10" />
+                    {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
+                  </div>
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-medium">Website</label>
+                  <Input {...register("website")} type="url" />
+                  {errors.website && <p className="text-xs text-red-500">{errors.website.message}</p>}
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Location</label>
-                <div className="relative">
-                  <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-                  <Input {...register("location")} className="pl-10" />
-                  {errors.location && <p className="text-xs text-red-500">{errors.location.message}</p>}
-                </div>
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-medium">Website</label>
-                <Input {...register("website")} type="url" />
-                {errors.website && <p className="text-xs text-red-500">{errors.website.message}</p>}
-              </div>
+            </section>
+            <div className="flex gap-3 pt-4">
+              <Button type="submit" className="flex-1" disabled={isPending}>
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </Button>
             </div>
-          </section>
-          <div className="flex gap-3 pt-4">
-            <Button type="submit" className="flex-1" disabled={isPending}>
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </div>
-        </form>
+          </form>
+
+          {/* Change Password Form */}
+          <form
+            onSubmit={handlePasswordSubmit(onPasswordSubmit)}
+            className="space-y-6"
+          >
+            <section className="bg-white dark:bg-card border border-border rounded-2xl shadow-sm overflow-hidden">
+              <div className="p-6 border-b border-border bg-muted/30">
+                <h3 className="font-semibold">Security Settings</h3>
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Current Password</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...registerPassword("old_password")}
+                  />
+                  {passwordErrors.old_password && (
+                    <p className="text-xs text-red-500">{passwordErrors.old_password.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">New Password</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...registerPassword("new_password")}
+                  />
+                  {passwordErrors.new_password && (
+                    <p className="text-xs text-red-500">{passwordErrors.new_password.message}</p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Confirm New Password</label>
+                  <Input
+                    type="password"
+                    placeholder="••••••••"
+                    {...registerPassword("new_password_confirm")}
+                  />
+                  {passwordErrors.new_password_confirm && (
+                    <p className="text-xs text-red-500">{passwordErrors.new_password_confirm.message}</p>
+                  )}
+                </div>
+                <Button type="submit" className="w-full mt-2" disabled={isChangingPassword}>
+                  {isChangingPassword ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating password...
+                    </>
+                  ) : (
+                    "Update Password"
+                  )}
+                </Button>
+              </div>
+            </section>
+          </form>
+        </div>
       </div>
     </motion.div>
   );
