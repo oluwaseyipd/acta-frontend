@@ -12,21 +12,7 @@ import PageLoading from "@/components/dashboard/PageLoading";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { taskApi } from "@/api/tasks";
 import { extractTime } from "@/components/utils/date-utils";
-
-
-type Priority = "low" | "medium" | "high";
-type Status = "todo" | "in_progress" | "completed";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: Priority;
-  status: Status;
-  created_at: string;
-  due_date: string;
-  due_time?: string;
-}
+import { Task, Status } from "@/types/task";
 
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",

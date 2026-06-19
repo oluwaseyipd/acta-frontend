@@ -13,21 +13,7 @@ import { toast } from "sonner"; // Changed to match Tasks.tsx consistency
 import { format } from "date-fns";
 import PageLoading from "@/components/dashboard/PageLoading";
 import { extractTime } from "@/components/utils/date-utils";
-
-type Priority = "low" | "medium" | "high";
-type Status = "todo" | "in_progress" | "completed";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: Priority;
-  status: Status;
-  createdAt: string;
-  dueDate: string;
-  due_date?: string; // Support both naming conventions seen in your files
-  dueTime?: string;
-}
+import { Task, Status } from "@/types/task";
 
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",

@@ -27,18 +27,7 @@ import { cn } from "@/lib/utils";
 import { useCategories } from "@/hooks/useCategories";
 import React from "react";
 import { extractTime } from "../utils/date-utils";
-
-type Priority = "low" | "medium" | "high";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: Priority;
-  category: string;
-  created_at: string;
-  due_date: string;
-}
+import { Task, Priority } from "@/types/task";
 
 interface TaskDetailModalProps {
   task: Task | null;
@@ -77,6 +66,53 @@ const generateTimeOptions = () => {
 };
 
 const timeOptions = generateTimeOptions();
+
+interface EditableFieldProps {
+  field: string;
+  label: string;
+  value: React.ReactNode;
+  children: React.ReactNode;
+  editingField: string | null;
+  onSaveField: () => void;
+  onFieldClick: (field: string) => void;
+}
+
+const EditableField = ({
+  field,
+  label,
+  value,
+  children,
+  editingField,
+  onSaveField,
+  onFieldClick,
+}: EditableFieldProps) => (
+  <div className="space-y-1.5">
+    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+      {label}
+    </label>
+    {editingField === field ? (
+      <div className="flex items-center gap-2">
+        <div className="flex-1">{children}</div>
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          onClick={onSaveField}
+          className="h-8 w-8"
+        >
+          <Check className="h-4 w-4" />
+        </Button>
+      </div>
+    ) : (
+      <div
+        onClick={() => onFieldClick(field)}
+        className="p-2 rounded-lg border border-transparent hover:border-border hover:bg-secondary/50 cursor-pointer transition-all"
+      >
+        {value}
+      </div>
+    )}
+  </div>
+);
 
 export function TaskDetailModal({ task, open, onOpenChange, onSave, }: TaskDetailModalProps) {
   const [editingField, setEditingField] = useState<string | null>(null);
@@ -141,44 +177,6 @@ if (!task || !editedTask) return null;
   return `${displayHour}:${minutes} ${ampm}`;
 };
 
-  const EditableField = ({
-    field,
-    label,
-    value,
-    children,
-  }: {
-    field: string;
-    label: string;
-    value: React.ReactNode;
-    children: React.ReactNode;
-  }) => (
-    <div className="space-y-1.5">
-      <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-        {label}
-      </label>
-      {editingField === field ? (
-        <div className="flex items-center gap-2">
-          <div className="flex-1">{children}</div>
-          <Button
-            size="icon"
-            variant="ghost"
-            onClick={handleSaveField}
-            className="h-8 w-8"
-          >
-            <Check className="h-4 w-4" />
-          </Button>
-        </div>
-      ) : (
-        <div
-          onClick={() => handleFieldClick(field)}
-          className="p-2 rounded-lg border border-transparent hover:border-border hover:bg-secondary/50 cursor-pointer transition-all"
-        >
-          {value}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -194,6 +192,9 @@ if (!task || !editedTask) return null;
             value={
               <h2 className="text-xl font-semibold">{editedTask.title}</h2>
             }
+            editingField={editingField}
+            onSaveField={handleSaveField}
+            onFieldClick={handleFieldClick}
           >
             <Input
               value={editedTask.title}
@@ -214,6 +215,9 @@ if (!task || !editedTask) return null;
                 {editedTask.description || "No description"}
               </p>
             }
+            editingField={editingField}
+            onSaveField={handleSaveField}
+            onFieldClick={handleFieldClick}
           >
             <Textarea
               value={editedTask.description}
@@ -241,6 +245,9 @@ if (!task || !editedTask) return null;
         {editedTask.priority}
       </span>
     }
+    editingField={editingField}
+    onSaveField={handleSaveField}
+    onFieldClick={handleFieldClick}
   >
     <Select
       value={editedTask.priority}
@@ -268,6 +275,9 @@ if (!task || !editedTask) return null;
             {isCatsLoading ? "Loading..." : currentCategoryName}
           </span>
         }
+        editingField={editingField}
+        onSaveField={handleSaveField}
+        onFieldClick={handleFieldClick}
       >
         <Select
           value={editedTask.category || ""}
@@ -307,6 +317,9 @@ if (!task || !editedTask) return null;
                   {formatDate(editedTask.due_date)}
                 </span>
               }
+              editingField={editingField}
+              onSaveField={handleSaveField}
+              onFieldClick={handleFieldClick}
             >
               <Popover>
                 <PopoverTrigger asChild>
@@ -341,6 +354,9 @@ if (!task || !editedTask) return null;
                   {formatTimeFromDate(editedTask.due_date)}
                 </span>
               }
+              editingField={editingField}
+              onSaveField={handleSaveField}
+              onFieldClick={handleFieldClick}
             >
               <Select
                 value={extractTime(editedTask.due_date) || ""}

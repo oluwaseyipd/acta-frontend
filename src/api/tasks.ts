@@ -1,4 +1,5 @@
 import apiClient, { endpoints } from '@/lib/api-client'; 
+import { Task } from '@/types/task';
 
 export const taskApi = {
 

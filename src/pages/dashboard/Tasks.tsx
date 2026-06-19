@@ -26,7 +26,7 @@ import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
 import PageLoading from "@/components/dashboard/PageLoading";
 import { extractTime } from "../../components/utils/date-utils";
-
+import { Task, Status } from "@/types/task";
 
 const formatTime = (timeStr?: string) => {
   if (!timeStr) return "";
@@ -36,22 +36,6 @@ const formatTime = (timeStr?: string) => {
   const displayHour = hour % 12 || 12;
   return `${displayHour}:${minutes} ${ampm}`;
 };
-
-
-
-type Priority = "low" | "medium" | "high";
-type Status = "todo" | "in_progress" | "completed";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: Priority;
-  status: Status;
-  createdAt: string;
-  dueDate: string;
-  dueTime?: string;
-}
 
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",
@@ -217,15 +201,6 @@ const groupedByDate = filteredTasks.reduce(
     } catch {
       return dateStr;
     }
-  };
-
-  const formatTime = (timeStr?: string) => {
-    if (!timeStr) return "";
-    const [hours, minutes] = timeStr.split(":");
-    const hour = parseInt(hours);
-    const ampm = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour % 12 || 12;
-    return `${displayHour}:${minutes} ${ampm}`;
   };
 
   if (isLoading) return <PageLoading />;

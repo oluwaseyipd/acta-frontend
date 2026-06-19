@@ -20,6 +20,7 @@ import { TaskDetailModal } from "@/components/dashboard/TaskDetailModal";
 import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
 import PageLoading from "@/components/dashboard/PageLoading";
 import { extractTime } from "../../components/utils/date-utils";
+import { Task, Status } from "@/types/task";
 
 const formatTime = (timeStr?: string) => {
   if (!timeStr) return "";
@@ -29,20 +30,6 @@ const formatTime = (timeStr?: string) => {
   const displayHour = hour % 12 || 12;
   return `${displayHour}:${minutes} ${ampm}`;
 };
-
-type Priority = "low" | "medium" | "high";
-type Status = "todo" | "in_progress" | "completed";
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  priority: Priority;
-  status: Status;
-  created_at: string;
-  due_date: string | null; // Updated to allow null
-  due_time?: string;
-}
 
 const priorityColors = {
   low: "bg-info/10 text-info border-info/20",
