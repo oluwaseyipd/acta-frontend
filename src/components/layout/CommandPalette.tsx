@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -51,32 +51,36 @@ export function CommandPalette() {
   const { setTheme } = useTheme();
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    if (!commandPaletteOpen) {
+  const handleOpenChange = (open: boolean) => {
+    setCommandPaletteOpen(open);
+    if (!open) {
       setSearch("");
     }
-  }, [commandPaletteOpen]);
+  };
 
   const handleNavigation = (href: string) => {
     navigate(href);
     setCommandPaletteOpen(false);
+    setSearch("");
   };
 
   const handleThemePreset = (preset: ThemePreset) => {
     setThemePreset(preset);
     setCommandPaletteOpen(false);
+    setSearch("");
   };
 
   const handleColorMode = (mode: "light" | "dark") => {
     setColorMode(mode);
     setTheme(mode);
     setCommandPaletteOpen(false);
+    setSearch("");
   };
 
   return (
     <CommandDialog
       open={commandPaletteOpen}
-      onOpenChange={setCommandPaletteOpen}
+      onOpenChange={handleOpenChange}
     >
       <CommandInput
         placeholder="Search tasks, navigate, or run commands..."

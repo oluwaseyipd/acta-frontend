@@ -38,6 +38,7 @@ type ProfileFormValues = z.infer<typeof profileSchema>;
 export default function Profile() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const queryClient = useQueryClient();
 
   // 2. Fetch Data
@@ -48,7 +49,7 @@ export default function Profile() {
 
   // 3. Mutation to Save
   const { mutate: updateProfile, isPending } = useMutation({
-    mutationFn: (data: ProfileFormValues) => profileApi.updateProfile(data),
+    mutationFn: (data: any) => profileApi.updateProfile(data), // Using FormData
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       toast.success("Profile updated successfully!");
@@ -76,30 +77,29 @@ export default function Profile() {
     if (file) {
       // Show a local preview immediately
       setPreviewUrl(URL.createObjectURL(file));
+      setSelectedFile(file);
     }
   };
 
-
   const onSubmit = (data: ProfileFormValues) => {
-  const formData = new FormData();
-  
-  // 1. Append text fields (excluding the avatar string from the 'data' object)
-  Object.entries(data).forEach(([key, value]) => {
-    // We skip 'avatar' here because 'data.avatar' is just a string URL
-    if (key !== "avatar" && value !== null && value !== undefined) {
-      formData.append(key, value);
+    const formData = new FormData();
+    
+    // 1. Append text fields (excluding the avatar string from the 'data' object)
+    Object.entries(data).forEach(([key, value]) => {
+      // We skip 'avatar' here because 'data.avatar' is just a string URL
+      if (key !== "avatar" && value !== null && value !== undefined) {
+        formData.append(key, value);
+      }
+    });
+
+    // 2. ONLY append avatar if a new file was actually picked
+    if (selectedFile) {
+      formData.append("avatar", selectedFile);
     }
-  });
 
-  // 2. ONLY append avatar if a new file was actually picked
-  const imageFile = fileInputRef.current?.files?.[0];
-  if (imageFile) {
-    formData.append("avatar", imageFile);
-  }
-
-  // 3. Send to your API
-  updateProfile(formData);
-};
+    // 3. Send to your API
+    updateProfile(formData);
+  };
 
   // 3. Early Returns
   if (isLoading) return <PageLoading />;

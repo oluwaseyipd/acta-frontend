@@ -39,6 +39,52 @@ const bottomNavItems = [
   { icon: Settings, label: "Settings", href: "/dashboard/settings" },
 ];
 
+interface CreateTaskButtonProps {
+  sidebarCollapsed: boolean;
+  onClick: () => void;
+}
+
+const CreateTaskButton = ({ sidebarCollapsed, onClick }: CreateTaskButtonProps) => {
+  const content = (
+    <button
+      onClick={onClick}
+      className={cn(
+        "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative w-full",
+      )}
+    >
+      <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+        <Plus className="h-4 w-4 text-primary" />
+      </span>
+
+      <AnimatePresence>
+        {!sidebarCollapsed && (
+          <motion.span
+            initial={{ opacity: 0, width: 0 }}
+            animate={{ opacity: 1, width: "auto" }}
+            exit={{ opacity: 0, width: 0 }}
+            className="text-sm font-medium whitespace-nowrap hover:text-primary overflow-hidden"
+          >
+            Create Task
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </button>
+  );
+
+  if (sidebarCollapsed) {
+    return (
+      <Tooltip delayDuration={0}>
+        <TooltipTrigger asChild>{content}</TooltipTrigger>
+        <TooltipContent side="right" sideOffset={10}>
+          Create Task
+        </TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return content;
+};
+
 export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
   const location = useLocation();
@@ -111,47 +157,6 @@ export function Sidebar() {
     return content;
   };
 
-  const CreateTaskButton = () => {
-    const content = (
-      <button
-        onClick={() => setIsCreateModalOpen(true)}
-        className={cn(
-          "flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative w-full",
-        )}
-      >
-        <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
-          <Plus className="h-4 w-4 text-primary" />
-        </span>
-
-        <AnimatePresence>
-          {!sidebarCollapsed && (
-            <motion.span
-              initial={{ opacity: 0, width: 0 }}
-              animate={{ opacity: 1, width: "auto" }}
-              exit={{ opacity: 0, width: 0 }}
-              className="text-sm font-medium whitespace-nowrap hover:text-primary overflow-hidden"
-            >
-              Create Task
-            </motion.span>
-          )}
-        </AnimatePresence>
-      </button>
-    );
-
-    if (sidebarCollapsed) {
-      return (
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>{content}</TooltipTrigger>
-          <TooltipContent side="right" sideOffset={10}>
-            Create Task
-          </TooltipContent>
-        </Tooltip>
-      );
-    }
-
-    return content;
-  };
-
   return (
     <>
       <motion.aside
@@ -183,7 +188,10 @@ export function Sidebar() {
         <nav className="flex-1 px-3 py-4 overflow-y-auto">
           {/* Create Task - First with gap */}
           <div className="mb-6">
-            <CreateTaskButton />
+            <CreateTaskButton
+              sidebarCollapsed={sidebarCollapsed}
+              onClick={() => setIsCreateModalOpen(true)}
+            />
           </div>
 
           {/* Other Nav Items */}
