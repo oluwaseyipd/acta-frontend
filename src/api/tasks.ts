@@ -2,16 +2,19 @@ import apiClient, { endpoints } from '@/lib/api-client';
 import { Task } from '@/types/task';
 
 export const taskApi = {
-
-  
   create: async (taskData: any) => {
-    // endpoints.tasks is likely '/tasks/'
     const { data } = await apiClient.post(endpoints.tasks, taskData);
     return data;
   },
-  // Now uses Axios + your Interceptors automatically!
+
   getAll: async () => {
     const { data } = await apiClient.get(endpoints.tasks);
+    if (Array.isArray(data)) {
+      return data;
+    }
+    if (data && Array.isArray(data.results)) {
+      return data;
+    }
     return data; 
   },
 
