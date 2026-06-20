@@ -24,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CreateTaskModal } from "@/components/dashboard/CreateTaskModal";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
@@ -89,6 +90,7 @@ export function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
   const location = useLocation();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const isActive = (href: string) => {
     if (href === "/dashboard") {
@@ -159,11 +161,23 @@ export function Sidebar() {
 
   return (
     <>
+      {isMobile && !sidebarCollapsed && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+          onClick={toggleSidebar}
+        />
+      )}
       <motion.aside
         initial={false}
-        animate={{ width: sidebarCollapsed ? 72 : 256 }}
+        animate={{ 
+          x: isMobile ? (sidebarCollapsed ? -270 : 0) : 0,
+          width: isMobile ? 256 : (sidebarCollapsed ? 72 : 256)
+        }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="h-screen fixed top-0 left-0 flex flex-col glass border-r border-border/50 z-50"
+        className={cn(
+          "h-screen fixed top-0 left-0 flex flex-col glass border-r border-border/50 z-50",
+          isMobile && "shadow-2xl"
+        )}
       >
         {/* Logo */}
         <div className="flex items-center gap-3 px-4 py-5 border-b border-border/50">

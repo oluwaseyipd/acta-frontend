@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Command, Bell, Moon, Sun, Monitor} from "lucide-react";
+import { Search, Command, Bell, Moon, Sun, Monitor, Menu, Waves } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -18,11 +18,13 @@ import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { profileApi } from "@/lib/profile";
 import { authApi } from "@/lib/auth";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 export function TopBar() {
-  const { setCommandPaletteOpen, setColorMode, colorMode } = useUIStore();
+  const { setCommandPaletteOpen, setColorMode, colorMode, toggleSidebar } = useUIStore();
   const { setTheme, theme } = useTheme();
+  const isMobile = useIsMobile();
 
   // Get username and email from currently logged in user. Create an avater with the first two letters of the username.
     const { data: user } = useQuery({
@@ -64,10 +66,25 @@ export function TopBar() {
       animate={{ y: 0, opacity: 1 }}
       className="sticky top-0 z-40 flex items-center justify-between h-16 px-6 glass border-b border-border/50"
     >
+      {/* Mobile Logo & Toggle */}
+      {isMobile && (
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+            <Menu className="h-6 w-6" />
+          </Button>
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-primary text-primary-foreground">
+              <Waves className="h-4 w-4" />
+            </div>
+            <span className="font-bold text-lg tracking-tight">Acta</span>
+          </div>
+        </div>
+      )}
+
       {/* Search */}
       <Button
         variant="outline"
-        className="relative w-72 justify-start text-muted-foreground hover:text-foreground"
+        className="relative w-72 justify-start text-muted-foreground hover:text-foreground hidden md:flex"
         onClick={() => setCommandPaletteOpen(true)}
       >
         <Search className="h-4 w-4 mr-2" />

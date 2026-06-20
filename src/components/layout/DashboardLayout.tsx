@@ -31,7 +31,7 @@ export function DashboardLayout() {
       <div
         className={cn(
           "flex-1 flex flex-col min-h-screen transition-all duration-300 overflow-hidden",
-          sidebarCollapsed ? "ml-[72px]" : "ml-[256px]",
+          isMobile ? "ml-0" : (sidebarCollapsed ? "ml-[72px]" : "ml-[256px]"),
         )}
       >
         <TopBar />
