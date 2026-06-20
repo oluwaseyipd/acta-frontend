@@ -175,8 +175,8 @@ export function Sidebar() {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className={cn(
-          "h-screen fixed top-0 left-0 flex flex-col glass border-r border-border/50 z-50",
-          isMobile && "shadow-2xl"
+          "h-screen fixed top-0 left-0 flex flex-col border-r border-border/50 z-50",
+          isMobile ? "bg-card shadow-2xl" : "glass"
         )}
       >
         {/* Logo */}
