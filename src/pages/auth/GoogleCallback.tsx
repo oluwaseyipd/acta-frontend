@@ -37,10 +37,10 @@ const GoogleCallback = () => {
   });
 
   useEffect(() => {
-    if (code) {
+    if (code && googleAuthMutation.isIdle) {
       googleAuthMutation.mutate(code);
     }
-  }, [code, googleAuthMutation]);
+  }, [code, googleAuthMutation.isIdle, googleAuthMutation.mutate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4 relative overflow-hidden">
