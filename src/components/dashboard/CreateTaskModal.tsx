@@ -207,7 +207,7 @@ export function CreateTaskModal({
         title: values.title,
         description: values.description || "",
         priority: values.priority,
-        status: "pending",
+        status: "todo",
         due_date: combinedISOString,
         category: values.category || null,
         assigned_to: user?.id, // Assign to current user by default
