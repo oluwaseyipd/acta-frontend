@@ -17,6 +17,7 @@ import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { profileApi } from "@/lib/profile";
+import { authApi } from "@/lib/auth";
 
 
 export function TopBar() {
@@ -157,7 +158,10 @@ export function TopBar() {
   </Link>
 </DropdownMenuItem>
 <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem 
+              className="text-destructive cursor-pointer" 
+              onClick={() => authApi.logout()}
+            >
               Log out
             </DropdownMenuItem>
           </DropdownMenuContent>

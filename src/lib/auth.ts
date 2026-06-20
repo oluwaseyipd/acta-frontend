@@ -45,6 +45,21 @@ export const authApi = {
   changePassword: async (credentials: { old_password: string; new_password: string; new_password_confirm: string }) => {
     const { data } = await apiClient.post(endpoints.changePassword, credentials);
     return data;
+  },
+
+  // Logout
+  logout: async () => {
+    const refreshToken = localStorage.getItem("refresh_token");
+    if (refreshToken) {
+      try {
+        await apiClient.post(endpoints.logout, { refresh: refreshToken });
+      } catch (err) {
+        console.error("Failed to blacklist token on logout:", err);
+      }
+    }
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "/auth/signin";
   }
 };
 

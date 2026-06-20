@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Sidebar } from "@/components/layout/SideBar";
@@ -5,6 +6,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { CommandPalette } from "@/components/layout/CommandPalette";
 import { useUIStore } from "@/store/ui-store";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -13,7 +15,14 @@ const pageVariants = {
 };
 
 export function DashboardLayout() {
-  const { sidebarCollapsed } = useUIStore();
+  const { sidebarCollapsed, setSidebarCollapsed } = useUIStore();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarCollapsed(true);
+    }
+  }, [isMobile, setSidebarCollapsed]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
