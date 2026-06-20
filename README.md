@@ -116,21 +116,23 @@ npm run dev
 
 This is the frontend application for Acta, currently featuring:
 
-- ✅ Complete UI component library setup
-- ✅ Modern theme system (light/dark modes)
-- ✅ Responsive landing page
-- ✅ Authentication system integration ready
-- ✅ API client with JWT support
-- ✅ Production-ready build configuration
+- ✅ Complete UI component library setup (Shadcn UI & Radix)
+- ✅ Modern theme system (Light/Dark modes + dynamic preset selections)
+- ✅ Responsive landing landing/marketing sections
+- ✅ Fully integrated User authentication & Registration flows
+- ✅ API client (Axios) with automatic JWT token refreshing & blacklisting on logout
+- ✅ Active task dashboard (Inbox, Today, Tasks, Completed views)
+- ✅ Google OAuth2 Single Sign-On flow with re-render loop protection
+- ✅ Responsive design, featuring an auto-collapsing sidebar on mobile screens that functions as a sliding drawer with a transparent click-away overlay
+- ✅ Global Error Boundary wrapper catching rendering crashes gracefully
+- ✅ Standardized database model task status options (`"todo"`, `"in_progress"`, `"completed"`, `"cancelled"`)
+- ✅ Production-ready Vite build configurations
 
 ## 🔮 Upcoming Features
 
-- Dashboard with task management
-- User authentication flows
-- Real-time collaboration
-- Advanced analytics
-- Mobile app companion
-- API integration with Django backend
+- Real-time collaboration and board share keys
+- Advanced analytics report generation exports
+- Mobile companion application wrapper (Capacitor/React Native)
 
 ## 🤝 Contributing
 
