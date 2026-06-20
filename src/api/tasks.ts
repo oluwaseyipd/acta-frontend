@@ -7,8 +7,8 @@ export const taskApi = {
     return data;
   },
 
-  getAll: async () => {
-    const { data } = await apiClient.get(endpoints.tasks);
+  getAll: async (params?: Record<string, any>) => {
+    const { data } = await apiClient.get(endpoints.tasks, { params });
     if (Array.isArray(data)) {
       return data;
     }
