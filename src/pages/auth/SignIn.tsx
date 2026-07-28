@@ -246,7 +246,7 @@ const SignIn = () => {
                   />
                 </svg>
               )}
-              Google
+              Continue with Google
             </Button>
           </div>
 

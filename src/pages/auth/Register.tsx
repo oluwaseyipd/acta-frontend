@@ -391,7 +391,7 @@ const Register = () => {
                   />
                 </svg>
               )}
-              Google
+              Continue with Google
             </Button>
           </div>
 
