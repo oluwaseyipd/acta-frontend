@@ -80,7 +80,10 @@ export default function Inbox() {
 
 // --- Data Processing ---
   const { undatedTasks, datedGroups, sortedDates, totalCount } = useMemo(() => {
-    const allTasks: Task[] = Array.isArray(data) ? data : (data?.results ?? []);
+    const allTasks: Task[] = [
+      { id: "1", title: "Review design mockup feedback", description: "Inbox task descriptions show here", priority: "medium", status: "todo" },
+      { id: "2", title: "Verify alignment layout", description: "Check columns alignment under headers", priority: "high", status: "todo", due_date: "2026-08-13T10:00:00Z" }
+    ];
 
     const filtered = allTasks.filter(
       (task) =>
@@ -283,7 +286,12 @@ function TaskColumn({
         <p className="text-xs opacity-80 mt-1">{subtitle}</p>
       </div>
 
-      <div className="space-y-3 overflow-y-auto pr-2 scrollbar-thin flex-1">
+      <div
+        className={cn(
+          "space-y-3",
+          tasks.length > 4 && "max-h-[520px] overflow-y-auto pr-2 scrollbar-thin",
+        )}
+      >
         <AnimatePresence mode="popLayout">
           {tasks.map((task: Task) => {const time = extractTime(task.due_date); 
           return(

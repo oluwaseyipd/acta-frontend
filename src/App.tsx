@@ -67,6 +67,7 @@ const App = () => {
               <Route path="/auth/google/callback" element={<GoogleCallback />} />
               <Route path="/auth/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              <Route path="/test-inbox" element={<div className="p-8 bg-background min-h-screen"><Inbox /></div>} />
 
               // Dashboard Routes
               <Route element={<ProtectedRoute />}>
