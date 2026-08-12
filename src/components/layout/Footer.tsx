@@ -20,9 +20,9 @@ const legalLinks = [
 ];
 
 const socialLinks = [
-  { name: "GitHub", icon: Github, href: "https://github.com" },
-  { name: "X (Twitter)", icon: Twitter, href: "https://twitter.com" },
-  { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com" },
+  { name: "GitHub", icon: Github, href: "https://github.com/oluwaseyipd" },
+  { name: "X (Twitter)", icon: Twitter, href: "https://x.com/oluwaseyipd" },
+  { name: "LinkedIn", icon: Linkedin, href: " https://www.linkedin.com/in/oluwaseyiae/" },
 ];
 
 export const Footer = () => {
@@ -122,7 +122,7 @@ export const Footer = () => {
           <p className="text-sm text-muted-foreground">
             Built by{" "}
             <a
-              href="https://github.com/oluwaseyipd"
+              href="https://oluwaseyiae.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary hover:text-primary/80 transition-colors"

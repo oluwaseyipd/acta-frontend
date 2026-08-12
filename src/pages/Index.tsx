@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
@@ -18,6 +19,10 @@ import { Button } from "@/components/ui/button";
 import { PublicNavbar } from "@/components/layout/PublicNavbar";
 import { Footer } from "@/components/layout/Footer";
 import heroImage from "@/assets/hero-image.png";
+import step1Img from "@/assets/step-1.png";
+import step2aImg from "@/assets/step-2(a).png";
+import step2bImg from "@/assets/step-2(b).png";
+import step3Img from "@/assets/step-3.png";
 
 const features = [
   {
@@ -50,6 +55,7 @@ const steps = [
     description:
       "Add tasks in seconds with our intuitive interface. Set priorities, deadlines, and categories.",
     icon: CheckCircle2,
+    image: step1Img,
   },
   {
     number: "02",
@@ -57,6 +63,10 @@ const steps = [
     description:
       "Use Kanban boards, lists, and filters to organize your workflow exactly how you want it.",
     icon: BarChart3,
+    images: {
+      board: step2aImg,
+      list: step2bImg,
+    },
   },
   {
     number: "03",
@@ -64,6 +74,7 @@ const steps = [
     description:
       "Watch your productivity soar with insights, analytics, and celebration of completed tasks.",
     icon: Star,
+    image: step3Img,
   },
 ];
 
@@ -147,6 +158,8 @@ const TestimonialCard = ({
 );
 
 const Index = () => {
+  const [step2View, setStep2View] = useState<"board" | "list">("board");
+
   return (
     <div className="min-h-screen bg-background overflow-hidden">
       <PublicNavbar />
@@ -268,52 +281,127 @@ const Index = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-20 px-6 bg-secondary/30">
-        <div className="container mx-auto">
+      <section className="py-24 px-6 bg-secondary/20 relative overflow-hidden">
+        {/* Subtle section background decorative blob */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="container mx-auto relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-center mb-16"
+            className="text-center mb-20"
           >
-            <span className="text-primary font-medium text-sm uppercase tracking-wider">
-              How It Works
+            <span className="text-primary font-semibold text-sm uppercase tracking-wider bg-primary/10 px-4 py-1.5 rounded-full border border-primary/20">
+              Workflow Guide
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold mt-2 mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold mt-4 mb-6 tracking-tight">
               Get Started in 3 Simple Steps
             </h2>
             <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              From signup to productivity in minutes. No complicated setup
-              required.
+              From signup to productivity in minutes. Experience a workspace that fits your natural thought flow.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {steps.map((step, index) => (
-              <motion.div
-                key={step.number}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.15 }}
-                className="relative"
-              >
-                {/* Connector Line */}
-                {index < steps.length - 1 && (
-                  <div className="hidden md:block absolute top-12 left-1/2 w-full h-0.5 bg-gradient-to-r from-border to-transparent" />
-                )}
+          <div className="space-y-32 max-w-6xl mx-auto">
+            {steps.map((step, index) => {
+              const isEven = index % 2 === 0;
+              const isStep2 = step.number === "02";
+              const currentImg = isStep2
+                ? (step2View === "board" ? step.images?.board : step.images?.list)
+                : step.image;
 
-                <div className="glass-card p-8 text-center relative z-10">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary text-primary-foreground text-2xl font-bold mb-6">
-                    {step.number}
+              return (
+                <motion.div
+                  key={step.number}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: "-100px" }}
+                  transition={{ duration: 0.7, ease: "easeOut" }}
+                  className={`flex flex-col items-center gap-12 lg:gap-20 ${
+                    isEven ? "lg:flex-row" : "lg:flex-row-reverse"
+                  }`}
+                >
+                  {/* Content Column */}
+                  <div className="w-full lg:w-[42%] space-y-6">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold uppercase tracking-wider">
+                      <step.icon className="w-3.5 h-3.5" />
+                      Step {step.number}
+                    </div>
+                    <h3 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground">
+                      {step.title}
+                    </h3>
+                    <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
+                      {step.description}
+                    </p>
+
+                    {isStep2 && (
+                      <div className="flex flex-wrap gap-2.5 pt-2">
+                        <button
+                          onClick={() => setStep2View("board")}
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border ${
+                            step2View === "board"
+                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25"
+                              : "bg-background/40 hover:bg-background/80 text-muted-foreground hover:text-foreground border-border/50"
+                          }`}
+                        >
+                          <Zap className="w-4 h-4" />
+                          Kanban Board
+                        </button>
+                        <button
+                          onClick={() => setStep2View("list")}
+                          className={`inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all border ${
+                            step2View === "list"
+                              ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/25"
+                              : "bg-background/40 hover:bg-background/80 text-muted-foreground hover:text-foreground border-border/50"
+                          }`}
+                        >
+                          <CheckCircle2 className="w-4 h-4" />
+                          Task List
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{step.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed">
-                    {step.description}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
+
+                  {/* Browser Mockup Image Column */}
+                  <div className="w-full lg:w-[58%]">
+                    <div className="relative group">
+                      {/* Decorative gradient glow behind mockup */}
+                      <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-accent/30 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition duration-1000 pointer-events-none" />
+
+                      {/* Mockup Frame */}
+                      <div className="relative glass-card border border-white/10 dark:border-white/5 shadow-2xl rounded-2xl overflow-hidden bg-card/30 backdrop-blur-md">
+                        {/* Browser Bar */}
+                        <div className="flex items-center justify-between px-4 py-3 bg-muted/40 border-b border-border/40 select-none">
+                          <div className="flex items-center gap-1.5">
+                            <div className="w-3 h-3 rounded-full bg-[#FF5F56] shadow-inner" />
+                            <div className="w-3 h-3 rounded-full bg-[#FFBD2E] shadow-inner" />
+                            <div className="w-3 h-3 rounded-full bg-[#27C93F] shadow-inner" />
+                          </div>
+                          <div className="flex-1 max-w-[240px] sm:max-w-[320px] mx-4 py-1 px-3 bg-background/40 rounded-md border border-border/30 text-[10px] sm:text-xs text-muted-foreground font-mono truncate text-center">
+                            acta.app/dashboard{step.number === "01" ? "/new" : step.number === "02" ? `/${step2View}` : "/analytics"}
+                          </div>
+                          <div className="w-12" /> {/* alignment spacer */}
+                        </div>
+
+                        {/* Screenshot Wrapper */}
+                        <div className="relative overflow-hidden aspect-[16/10] bg-muted/10">
+                          <motion.img
+                            key={currentImg}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                            src={currentImg}
+                            alt={step.title}
+                            className="w-full h-full object-cover object-top hover:scale-[1.01] transition-transform duration-700 ease-out"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>
