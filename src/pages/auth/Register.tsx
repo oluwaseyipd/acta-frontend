@@ -41,6 +41,7 @@ const passwordRequirements = [
 const Register = () => {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
@@ -247,7 +248,7 @@ const Register = () => {
                   <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                   <Input
                     id="password_confirm"
-                    type={showPassword ? "text" : "password_confirm"}
+                    type={showConfirmPassword ? "text" : "password"}
                     placeholder="••••••••"
                     className="pl-10 pr-10 h-12"
                     value={formData.password_confirm}
@@ -258,10 +259,10 @@ const Register = () => {
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
-                    {showPassword ? (
+                    {showConfirmPassword ? (
                       <EyeOff className="w-5 h-5" />
                     ) : (
                       <Eye className="w-5 h-5" />
