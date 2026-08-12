@@ -32,14 +32,16 @@ export default function Analytics() {
   // --- 2. Overdue Logic ---
   const today = startOfDay(new Date());
   const overdueCount = tasks.filter((t) => {
-    return t.status !== "completed" && isBefore(new Date(t.dueDate), today);
+    const rawDate = t.due_date || t.dueDate;
+    return t.status !== "completed" && rawDate && isBefore(new Date(rawDate), today);
   }).length;
 
   // --- 3. Velocity (Tasks done in last 7 days) ---
   const last7Days = subDays(today, range);
-  const recentCompleted = tasks.filter((t) => 
-    t.status === "completed" && isAfter(new Date(t.dueDate), last7Days)
-  ).length;
+  const recentCompleted = tasks.filter((t) => {
+    const rawDate = t.due_date || t.dueDate;
+    return t.status === "completed" && rawDate && isAfter(new Date(rawDate), last7Days);
+  }).length;
 
 
 
@@ -47,8 +49,11 @@ export default function Analytics() {
   let streak = 0;
   let checkDate = new Date();
   const completedDates = tasks
-    .filter(t => t.status === "completed" && t.dueDate)
-    .map(t => format(new Date(t.dueDate), "yyyy-MM-dd"));
+    .filter(t => t.status === "completed" && (t.due_date || t.dueDate))
+    .map(t => {
+      const rawDate = t.due_date || t.dueDate;
+      return format(new Date(rawDate!), "yyyy-MM-dd");
+    });
 
   const uniqueDates = new Set(completedDates);
 

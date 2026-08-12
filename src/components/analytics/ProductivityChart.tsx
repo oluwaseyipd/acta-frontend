@@ -19,8 +19,9 @@ export function ProductivityChart({ tasks, range }: ProductivityChartProps) {
       const dateStr = range > 30 ? format(date, "MMM dd") : format(date, "dd MMM");
       
       const count = tasks.filter((task) => {
-        if (task.status !== "completed" || !task.dueDate) return false;
-        return isSameDay(parseISO(task.dueDate), date);
+        const rawDate = task.due_date || task.dueDate;
+        if (task.status !== "completed" || !rawDate) return false;
+        return isSameDay(parseISO(rawDate), date);
       }).length;
 
       return { day: dateStr, completed: count };

@@ -9,9 +9,10 @@ export function ActivityHeatmap({ tasks }: { tasks: any[] }) {
       <h3 className="text-lg font-semibold mb-4">Last 4 Weeks Activity</h3>
       <div className="flex flex-wrap gap-2">
         {last28Days.map((date) => {
-          const count = tasks.filter(t => 
-            t.status === "completed" && isSameDay(new Date(t.dueDate), date)
-          ).length;
+          const count = tasks.filter(t => {
+            const rawDate = t.due_date || t.dueDate;
+            return t.status === "completed" && rawDate && isSameDay(new Date(rawDate), date);
+          }).length;
 
           return (
             <div
