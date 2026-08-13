@@ -5,13 +5,14 @@
 </div>
 
 <p align="center">
-  <span style="font-weight: bold; background:orange; color:white; padding:0.5rem; border-radius:0.5rem;">
-    <a href="https://actaly.vercel.app/" target="_blank">Live Preview</a> 
-  </span>
-  <span style="font-weight: bold; background:blue; color:white; padding:0.5rem; border-radius:0.5rem;">
-    <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">Backend Repository</a> 
-  </span>
+  <a href="https://actaly.vercel.app/" target="_blank" style="font-weight: bold; color: #FFA500; margin-right: 15px;">
+    Live Preview
+  </a> 
+  <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank" style="font-weight: bold; color: #0000FF;">
+    Backend Repository
+  </a>
 </p>
+
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-19.2.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
