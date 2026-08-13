@@ -4,7 +4,14 @@
   <img src="src/assets/readme-image.png" alt="Acta Dashboard" width="100%" />
 </div>
 
-[Live Preview](https://actaly.vercel.app/) | [Backend Repository](https://github.com/oluwaseyipd/acta-backend)
+<p align="center">
+  <span style="font-weight: bold; background:orange; color:white; padding:0.5rem; border-radius:0.5rem;">
+    <a href="https://actaly.vercel.app/" target="_blank">[Live Preview](https://actaly.vercel.app/)</a> 
+  </span>
+  <span style="font-weight: bold; background:blue; color:white; padding:0.5rem; border-radius:0.5rem;">
+    <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">[Backend Repository](https://github.com/oluwaseyipd/acta-backend)</a> 
+  </span>
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/React-19.2.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
