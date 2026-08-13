@@ -1,15 +1,11 @@
 # Acta - Professional Task & Productivity Workspace (Frontend)
 
-<div align="center">
-  <img src="src/assets/readme-image.png" alt="Acta Dashboard" width="100%" />
-</div>
-
 <p align="center">
-  <a href="https://actaly.vercel.app/" target="_blank" style="font-weight: bold; color: #FFA500; margin-right: 15px;">
-    Live Preview
-  </a> 
-  <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank" style="font-weight: bold; color: #0000FF;">
-    Backend Repository
+  <a href="https://actaly.vercel.app" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Preview-orange" alt="Live Preview">
+  </a>
+  <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">
+    <img src="https://img.shields.io/badge/Backend%20Repository-blue" alt="Backend Repository">
   </a>
 </p>
 
