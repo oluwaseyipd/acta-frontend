@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/Live%20Preview-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Preview">
   </a>
   <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">
-    <img src="https://img.shields.io/badge/Backend Repository-181717?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repository">
+    <img src="https://img.shields.io/badge/Backend Repository-3F85E2?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repository">
   </a>
 </p>
 
