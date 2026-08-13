@@ -6,10 +6,10 @@
 
 <p align="center">
   <span style="font-weight: bold; background:orange; color:white; padding:0.5rem; border-radius:0.5rem;">
-    <a href="https://actaly.vercel.app/" target="_blank">[Live Preview](https://actaly.vercel.app/)</a> 
+    <a href="https://actaly.vercel.app/" target="_blank">Live Preview</a> 
   </span>
   <span style="font-weight: bold; background:blue; color:white; padding:0.5rem; border-radius:0.5rem;">
-    <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">[Backend Repository](https://github.com/oluwaseyipd/acta-backend)</a> 
+    <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">Backend Repository</a> 
   </span>
 </p>
 
