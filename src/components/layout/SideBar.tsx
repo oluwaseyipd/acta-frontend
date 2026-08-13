@@ -169,7 +169,7 @@ export function Sidebar() {
       )}
       <motion.aside
         initial={false}
-        animate={{ 
+        animate={{
           x: isMobile ? (sidebarCollapsed ? -270 : 0) : 0,
           width: isMobile ? 256 : (sidebarCollapsed ? 72 : 256)
         }}
@@ -180,10 +180,18 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-4 py-5 border-b border-border/50">
-          <div className="p-2 rounded-xl bg-primary text-primary-foreground shrink-0">
-            <Waves className="h-5 w-5" />
-          </div>
+        <div className={cn(
+          "flex items-center border-b border-border/50 transition-all duration-300",
+          sidebarCollapsed ? "justify-center px-2 h-16" : "px-4 h-24"
+        )}>
+          <img 
+            src={sidebarCollapsed ? "/icon.png" : "/logo.png"} 
+            className={cn(
+              "object-contain shrink-0 transition-all duration-300",
+              sidebarCollapsed ? "h-10 w-10" : "h-24 w-24"
+            )} 
+            alt="Acta" 
+          />
           <AnimatePresence>
             {!sidebarCollapsed && (
               <motion.div
@@ -192,7 +200,6 @@ export function Sidebar() {
                 exit={{ opacity: 0, x: -10 }}
                 className="overflow-hidden"
               >
-                <h1 className="text-xl font-bold text-gradient">Acta</h1>
               </motion.div>
             )}
           </AnimatePresence>

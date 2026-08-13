@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Mail, ArrowLeft, ArrowRight, Waves, CheckCircle2 } from "lucide-react";
+import { Mail, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -53,11 +53,8 @@ const ForgotPassword = () => {
       >
         {/* Logo */}
         <div className="flex flex-col items-center text-center">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Waves className="w-6 h-6 text-accent" />
-            </div>
-            <span className="text-2xl font-bold">Acta</span>
+          <Link to="/" className="">
+            <img src="/logo.png" className="w-32 h-32 object-contain" alt="Acta" />
           </Link>
         </div>
 

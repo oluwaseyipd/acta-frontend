@@ -12,14 +12,14 @@ import PageLoading from "@/components/dashboard/PageLoading";
 
 export default function Analytics() {
   const [range, setRange] = useState<number>(7);
-  
+
   const { data, isLoading } = useQuery({
     queryKey: ["tasks"],
     queryFn: taskApi.getAll,
   });
 
 
-  
+
   const tasks = useMemo(() => {
     return Array.isArray(data) ? data : (data?.results ?? []);
   }, [data]);
@@ -46,94 +46,94 @@ export default function Analytics() {
 
 
   const currentStreak = useMemo(() => {
-  let streak = 0;
-  let checkDate = new Date();
-  const completedDates = tasks
-    .filter(t => t.status === "completed" && (t.due_date || t.dueDate))
-    .map(t => {
-      const rawDate = t.due_date || t.dueDate;
-      return format(new Date(rawDate!), "yyyy-MM-dd");
-    });
+    let streak = 0;
+    let checkDate = new Date();
+    const completedDates = tasks
+      .filter(t => t.status === "completed" && (t.due_date || t.dueDate))
+      .map(t => {
+        const rawDate = t.due_date || t.dueDate;
+        return format(new Date(rawDate!), "yyyy-MM-dd");
+      });
 
-  const uniqueDates = new Set(completedDates);
+    const uniqueDates = new Set(completedDates);
 
-  while (uniqueDates.has(format(checkDate, "yyyy-MM-dd"))) {
-    streak++;
-    checkDate = subDays(checkDate, 1);
-  }
-  
-  // If today isn't done yet, check if yesterday was the start of a streak
-  if (streak === 0) {
-    checkDate = subDays(new Date(), 1);
     while (uniqueDates.has(format(checkDate, "yyyy-MM-dd"))) {
       streak++;
       checkDate = subDays(checkDate, 1);
     }
-  }
-  return streak;
-}, [tasks]);
+
+    // If today isn't done yet, check if yesterday was the start of a streak
+    if (streak === 0) {
+      checkDate = subDays(new Date(), 1);
+      while (uniqueDates.has(format(checkDate, "yyyy-MM-dd"))) {
+        streak++;
+        checkDate = subDays(checkDate, 1);
+      }
+    }
+    return streak;
+  }, [tasks]);
 
   if (isLoading) return <PageLoading />;
 
 
   return (
-        <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col h-full overflow-hidden"
-        >
-            {/* Header - Fixed */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
-                <div>
-                    <h1 className="text-3xl font-bold">Tasks</h1>
-                    <p className="text-muted-foreground">
-                        Analytics Dashboard
-                    </p>
-                </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="flex flex-col h-full overflow-hidden"
+    >
+      {/* Header - Fixed */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 flex-shrink-0">
+        <div>
+          <h1 className="text-3xl font-bold">Tasks</h1>
+          <p className="text-muted-foreground">
+            Analytics Dashboard
+          </p>
+        </div>
 
-                <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg w-fit">
-                  {[7, 30, 90].map((days) => (
-                      <Button
-                        key={days}
-                        variant={range === days ? "default" : "ghost"}
-                        size="sm"
-                        onClick={() => setRange(days)}
-                        className="px-4"
-                      >
-                        {days}D
-                      </Button>
-                    ))}
-                </div>
+        <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-lg w-fit">
+          {[7, 30, 90].map((days) => (
+            <Button
+              key={days}
+              variant={range === days ? "default" : "ghost"}
+              size="sm"
+              onClick={() => setRange(days)}
+              className="px-4"
+            >
+              {days}D
+            </Button>
+          ))}
+        </div>
 
-            </div>
+      </div>
 
-      <div className="flex flex-col gap-6">   
+      <div className="flex flex-col gap-6">
         {/* Row 1: KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <AnalyticsCard title="Completion Rate" value={`${completionRate}%`} desc="Overall productivity" />
-          <AnalyticsCard title={`Tasks Done (${range}d)`} value={recentCompleted} desc={`Velocity last ${range} days`}  />
+          <AnalyticsCard title={`Tasks Done (${range}d)`} value={recentCompleted} desc={`Velocity last ${range} days`} />
           <AnalyticsCard title="Overdue" value={overdueCount} desc="Needs immediate action" variant="destructive" />
           <AnalyticsCard title="Total Archive" value={completed} desc="Total tasks finished" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Row 2: Charts */}
-            <div className="lg:col-span-2">
-              <ProductivityChart
-               tasks={tasks} 
-               range={range} />
-            </div>
-              {/* <PriorityPieChart tasks={tasks} /> */}
+          {/* Row 2: Charts */}
+          <div className="lg:col-span-2">
+            <ProductivityChart
+              tasks={tasks}
+              range={range} />
+          </div>
+          {/* <PriorityPieChart tasks={tasks} /> */}
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <PriorityPieChart tasks={tasks} />
-            <ActivityHeatmap tasks={tasks} />
+          <PriorityPieChart tasks={tasks} />
+          <ActivityHeatmap tasks={tasks} />
 
         </div>
 
 
-        
-      </div>  
+
+      </div>
     </motion.div>
   );
 }

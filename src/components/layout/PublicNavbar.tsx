@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
-import { Waves, Menu, X, Moon, Sun, ChevronDown } from "lucide-react";
+import { Menu, X, Moon, Sun, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
 import {
@@ -47,12 +47,10 @@ export const PublicNavbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 group">
             <motion.div
-              whileHover={{ rotate: 10 }}
-              className="p-2 rounded-xl bg-primary text-primary-foreground"
+              className="shrink-0"
             >
-              <Waves className="h-5 w-5" />
+              <img src="/logo.png" className="h-20 w-20 object-contain" alt="Acta" />
             </motion.div>
-            <span className="text-xl font-bold text-gradient">Acta</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -61,11 +59,10 @@ export const PublicNavbar = () => {
               <Link
                 key={link.path}
                 to={link.path}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  location.pathname === link.path
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                }`}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                  }`}
               >
                 {link.name}
               </Link>
@@ -128,11 +125,10 @@ export const PublicNavbar = () => {
                   key={link.path}
                   to={link.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${
-                    location.pathname === link.path
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
-                  }`}
+                  className={`block px-4 py-3 rounded-lg text-sm font-medium transition-colors ${location.pathname === link.path
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                    }`}
                 >
                   {link.name}
                 </Link>

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Waves, Loader2, AlertCircle, ArrowRight } from "lucide-react";
+import { Loader2, AlertCircle, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "@/lib/auth";
@@ -57,11 +57,8 @@ const GoogleCallback = () => {
         className="w-full max-w-md bg-card border border-border rounded-3xl p-8 shadow-xl relative z-10 flex flex-col items-center text-center gap-6"
       >
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 mb-2">
-          <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center shadow-md">
-            <Waves className="w-7 h-7 text-accent" />
-          </div>
-          <span className="text-3xl font-extrabold tracking-tight">Acta</span>
+        <Link to="/" className="">
+          <img src="/logo.png" className="w-32 h-32 object-contain" alt="Acta" />
         </Link>
 
         {displayError ? (

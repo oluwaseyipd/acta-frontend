@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Command, Bell, Moon, Sun, Monitor, Menu, Waves } from "lucide-react";
+import { Search, Command, Bell, Moon, Sun, Monitor, Menu } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -27,17 +27,17 @@ export function TopBar() {
   const isMobile = useIsMobile();
 
   // Get username and email from currently logged in user. Create an avater with the first two letters of the username.
-    const { data: user } = useQuery({
-      queryKey: ["currentUser"],
-      queryFn: () => profileApi.getProfile(),
-    });
+  const { data: user } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => profileApi.getProfile(),
+  });
 
-    const initials = (
-    (user?.first_name?.slice(0,1) || "") + 
-    (user?.last_name?.slice(0,1) || "")
+  const initials = (
+    (user?.first_name?.slice(0, 1) || "") +
+    (user?.last_name?.slice(0, 1) || "")
   ).toUpperCase() || "??";
 
-  
+
 
   // Keyboard shortcut for command palette
   useEffect(() => {
@@ -73,10 +73,7 @@ export function TopBar() {
             <Menu className="h-6 w-6" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-lg bg-primary text-primary-foreground">
-              <Waves className="h-4 w-4" />
-            </div>
-            <span className="font-bold text-lg tracking-tight">Acta</span>
+            <img src="/icon.png" className="h-7 w-7 object-contain" alt="Acta" />
           </div>
         </div>
       )}
@@ -84,7 +81,7 @@ export function TopBar() {
       {/* Search */}
       <Button
         variant="outline"
-        className="relative w-72 justify-start text-muted-foreground hover:text-foreground hidden md:flex"
+        className="relative w-full md:w-72 justify-start text-muted-foreground hover:text-foreground hidden md:flex"
         onClick={() => setCommandPaletteOpen(true)}
       >
         <Search className="h-4 w-4 mr-2" />
@@ -147,7 +144,7 @@ export function TopBar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
               <Avatar className="h-10 w-10 border-2 border-primary/20">
-               <AvatarImage src={user?.avatar} alt={user?.first_name} />
+                <AvatarImage src={user?.avatar} alt={user?.first_name} />
 
                 <AvatarFallback className="bg-primary text-primary-foreground">
                   {initials}
@@ -162,21 +159,21 @@ export function TopBar() {
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </DropdownMenuLabel>
-<DropdownMenuSeparator />
-<DropdownMenuItem asChild>
-  <Link to="profile" className="w-full cursor-pointer">
-    Profile
-  </Link>
-</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="profile" className="w-full cursor-pointer">
+                Profile
+              </Link>
+            </DropdownMenuItem>
 
-<DropdownMenuItem asChild>
-  <Link to="settings" className="w-full cursor-pointer">
-    Settings
-  </Link>
-</DropdownMenuItem>
-<DropdownMenuSeparator />
-            <DropdownMenuItem 
-              className="text-destructive cursor-pointer" 
+            <DropdownMenuItem asChild>
+              <Link to="settings" className="w-full cursor-pointer">
+                Settings
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              className="text-destructive cursor-pointer"
               onClick={() => authApi.logout()}
             >
               Log out

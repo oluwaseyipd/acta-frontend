@@ -80,13 +80,18 @@ export default function Today() {
         playPop();
 
         setTimeout(() => {
-          toggleMutation.mutate({ id: taskId, status: "completed" });
-          setCompletingTasks((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
-
+          toggleMutation.mutate(
+            { id: taskId, status: "completed" },
+            {
+              onSettled: () => {
+                setCompletingTasks((prev) => {
+                  const next = new Set(prev);
+                  next.delete(taskId);
+                  return next;
+                });
+              },
+            }
+          );
           toast.success("Task completed!", {
             action: {
               label: "UNDO",

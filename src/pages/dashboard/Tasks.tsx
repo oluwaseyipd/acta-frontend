@@ -152,12 +152,18 @@ const groupedByDate = filteredTasks.reduce(
         setCompletingTasks((prev) => new Set(prev).add(taskId));
         playPop();
         setTimeout(() => {
-          toggleMutation.mutate({ id: taskId, status: "completed" });
-          setCompletingTasks((prev) => {
-            const next = new Set(prev);
-            next.delete(taskId);
-            return next;
-          });
+          toggleMutation.mutate(
+            { id: taskId, status: "completed" },
+            {
+              onSettled: () => {
+                setCompletingTasks((prev) => {
+                  const next = new Set(prev);
+                  next.delete(taskId);
+                  return next;
+                });
+              },
+            }
+          );
           toast.success("Task completed!");
         }, 400);
       } else {
@@ -257,7 +263,10 @@ const groupedByDate = filteredTasks.reduce(
         </div>
       </div>
 
-    <div className="flex-1 overflow-y-auto">
+    <div className={cn(
+      "flex-1 min-h-0",
+      taskViewMode === "list" ? "overflow-y-auto" : "flex flex-col"
+    )}>
       {filteredTasks.length === 0 ? (
       <div className="flex flex-col items-center justify-center h-full py-12 text-center">
           <div className="p-4 bg-muted/20 rounded-full mb-4">

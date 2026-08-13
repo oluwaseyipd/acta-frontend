@@ -78,12 +78,9 @@ export default function Inbox() {
     },
   });
 
-// --- Data Processing ---
+  // --- Data Processing ---
   const { undatedTasks, datedGroups, sortedDates, totalCount } = useMemo(() => {
-    const allTasks: Task[] = [
-      { id: "1", title: "Review design mockup feedback", description: "Inbox task descriptions show here", priority: "medium", status: "todo" },
-      { id: "2", title: "Verify alignment layout", description: "Check columns alignment under headers", priority: "high", status: "todo", due_date: "2026-08-13T10:00:00Z" }
-    ];
+    const allTasks = Array.isArray(data) ? data : (data?.results ?? []);
 
     const filtered = allTasks.filter(
       (task) =>
@@ -100,8 +97,8 @@ export default function Inbox() {
         undated.push(task);
       } else {
         // NORMALIZATION: Split the ISO string to get only the YYYY-MM-DD part
-        const dateKey = task.due_date.split("T")[0]; 
-        
+        const dateKey = task.due_date.split("T")[0];
+
         if (!dated[dateKey]) dated[dateKey] = [];
         dated[dateKey].push(task);
       }
@@ -125,12 +122,18 @@ export default function Inbox() {
       playPop();
       setCompletingTasks((prev) => new Set(prev).add(taskId));
       setTimeout(() => {
-        toggleMutation.mutate({ id: taskId, status: "completed" });
-        setCompletingTasks((prev) => {
-          const next = new Set(prev);
-          next.delete(taskId);
-          return next;
-        });
+        toggleMutation.mutate(
+          { id: taskId, status: "completed" },
+          {
+            onSettled: () => {
+              setCompletingTasks((prev) => {
+                const next = new Set(prev);
+                next.delete(taskId);
+                return next;
+              });
+            },
+          }
+        );
         toast.success("Task completed!");
       }, 400);
     },
@@ -151,7 +154,7 @@ export default function Inbox() {
     }
   };
 
-  
+
 
   if (isLoading) return <PageLoading />;
   if (error)
@@ -194,7 +197,8 @@ export default function Inbox() {
             size="sm"
             className="gap-2"
           >
-            <Plus className="h-4 w-4" /> New Task
+            <Plus className="h-4 w-4" />
+            <span className="hidden md:flex">New Task</span>
           </Button>
         </div>
       </div>
@@ -293,53 +297,55 @@ function TaskColumn({
         )}
       >
         <AnimatePresence mode="popLayout">
-          {tasks.map((task: Task) => {const time = extractTime(task.due_date); 
-          return(
-            <motion.div
-              key={task.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{
-                opacity: completingTasks.has(task.id) ? 0 : 1,
-                x: completingTasks.has(task.id) ? -20 : 0,
-              }}
-              exit={{ opacity: 0, x: -20 }}
-              onClick={(e) => onTaskClick(task, e)}
-              className="p-4 rounded-xl bg-card border border-border shadow-sm hover:shadow-md transition-all cursor-pointer"
-            >
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  checked={task.status === "completed"}
-                  onCheckedChange={() => onToggle(task.id)}
-                  className="mt-0.5"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-medium text-sm truncate">{task.title}</h4>
-                  {task.description && (
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
-                      {task.description}
-                    </p>
-                  )}
-                 {/* Time & Status */}
-                                           <div className="flex flex-row justify-between gap-2 mt-2 text-xs text-muted-foreground">
-                                               {time && (
-                                                 <span className="flex items-center gap-1">
-                                                   <Clock className="h-3 w-3" />
-                                                   {formatTime(time)}
-                                                 </span>
-                                               )}
-                                             <span
-                                             className={cn(
-                                               "mt-2 inline-block px-2 py-0.5 text-xs rounded border capitalize",
-                                               priorityColors[task.priority],
-                                             )}
-                                           >
-                                             {task.priority}
-                                           </span>
-                                           </div>
+          {tasks.map((task: Task) => {
+            const time = extractTime(task.due_date);
+            return (
+              <motion.div
+                key={task.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{
+                  opacity: completingTasks.has(task.id) ? 0 : 1,
+                  x: completingTasks.has(task.id) ? -20 : 0,
+                }}
+                exit={{ opacity: 0, x: -20 }}
+                onClick={(e) => onTaskClick(task, e)}
+                className="p-4 rounded-xl bg-card border border-border shadow-sm hover:shadow-md transition-all cursor-pointer"
+              >
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    checked={task.status === "completed"}
+                    onCheckedChange={() => onToggle(task.id)}
+                    className="mt-0.5"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-medium text-sm truncate">{task.title}</h4>
+                    {task.description && (
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {task.description}
+                      </p>
+                    )}
+                    {/* Time & Status */}
+                    <div className="flex flex-row justify-between gap-2 mt-2 text-xs text-muted-foreground">
+                      {time && (
+                        <span className="flex items-center gap-1">
+                          <Clock className="h-3 w-3" />
+                          {formatTime(time)}
+                        </span>
+                      )}
+                      <span
+                        className={cn(
+                          "mt-2 inline-block px-2 py-0.5 text-xs rounded border capitalize",
+                          priorityColors[task.priority],
+                        )}
+                      >
+                        {task.priority}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          )})}
+              </motion.div>
+            )
+          })}
         </AnimatePresence>
       </div>
 

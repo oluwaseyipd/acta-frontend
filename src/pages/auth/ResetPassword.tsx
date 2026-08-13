@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Lock, Eye, EyeOff, ArrowRight, Waves, CheckCircle2, Check, AlertCircle } from "lucide-react";
+import { Lock, Eye, EyeOff, ArrowRight, CheckCircle2, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,11 +96,8 @@ const ResetPassword = () => {
       >
         {/* Logo */}
         <div className="flex flex-col items-center text-center">
-          <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-              <Waves className="w-6 h-6 text-accent" />
-            </div>
-            <span className="text-2xl font-bold">Acta</span>
+          <Link to="/" className="">
+            <img src="/logo.png" className="w-32 h-32 object-contain" alt="Acta" />
           </Link>
         </div>
 
@@ -193,16 +190,14 @@ const ResetPassword = () => {
                   return (
                     <div
                       key={req.id}
-                      className={`flex items-center gap-2 text-xs transition-colors ${
-                        isMet ? "text-gray-600" : "text-red-600"
-                      }`}
+                      className={`flex items-center gap-2 text-xs transition-colors ${isMet ? "text-gray-600" : "text-red-600"
+                        }`}
                     >
                       <div
-                        className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${
-                          isMet
+                        className={`w-4 h-4 rounded-full flex items-center justify-center border transition-colors ${isMet
                             ? "bg-accent border-accent"
                             : "border-muted-foreground/30"
-                        }`}
+                          }`}
                       >
                         {isMet && (
                           <Check className="w-2.5 h-2.5 text-accent-foreground" />

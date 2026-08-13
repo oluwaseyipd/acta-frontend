@@ -75,12 +75,18 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
           playPop();
 
           setTimeout(() => {
-            toggleMutation.mutate({ id: taskId, status: "completed" });
-            setCompletingTasks((prev) => {
-              const next = new Set(prev);
-              next.delete(taskId);
-              return next;
-            });
+            toggleMutation.mutate(
+              { id: taskId, status: "completed" },
+              {
+                onSettled: () => {
+                  setCompletingTasks((prev) => {
+                    const next = new Set(prev);
+                    next.delete(taskId);
+                    return next;
+                  });
+                },
+              }
+            );
 
             toast.success("Task completed!", {
               action: {
@@ -167,8 +173,8 @@ export const TasksDueToday = forwardRef<HTMLDivElement, { tasks: Task[] }>(
                     />
 
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="space-y-1 flex-1">
+                      <div className="flex items-start justify-between gap-4 min-w-0">
+                        <div className="space-y-1 flex-1 min-w-0">
                           <h3
                             className={cn(
                               "font-semibold transition-all truncate",

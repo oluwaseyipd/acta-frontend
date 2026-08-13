@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Waves, Github, Twitter, Linkedin, CheckCircle2 } from "lucide-react";
+import { Github, Twitter, Linkedin, CheckCircle2 } from "lucide-react";
 
 const productLinks = [
   { name: "Features", path: "/features" },
@@ -31,12 +31,9 @@ export const Footer = () => {
       <div className="container mx-auto px-6 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-12">
           {/* Column 1: Brand */}
-          <div className="space-y-6">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="p-2 rounded-xl bg-primary text-primary-foreground">
-                <Waves className="h-5 w-5" />
-              </div>
-              <span className="text-xl font-bold text-gradient">Acta</span>
+          <div className="space-y-4">
+            <Link to="/" className="">
+              <img src="/logo.png" className="h-20 w-20 object-contain" alt="Acta" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed">
               Manage your tasks with elegance and efficiency.
