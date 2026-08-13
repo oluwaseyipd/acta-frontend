@@ -6,9 +6,9 @@
 
 <p align="center">
   <a href="https://actaly.vercel.app" target="_blank">
-    <img src="https://img.shields.io/badge/Live%20Preview-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Preview">
+    <img src="https://img.shields.io/badge/Live%20Preview-1F883D?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Preview">
   </a>
-  <a href="https://github.com/oluwaseyipd/acta-backend" target="_blank">
+  <a href="https://github.com/oluwaseyipd/Acta_backend" target="_blank">
     <img src="https://img.shields.io/badge/Backend Repository-3F85E2?style=for-the-badge&logo=github&logoColor=white" alt="Backend Repository">
   </a>
 </p>
