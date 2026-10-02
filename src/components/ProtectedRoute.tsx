@@ -1,15 +1,18 @@
 import { Navigate, Outlet } from 'react-router-dom';
+import { isAuthenticated, clearAuthSession } from '@/lib/auth';
 
 const ProtectedRoute = () => {
-  const token = localStorage.getItem('access_token');
+  const isAuth = isAuthenticated();
 
-  // If no token exists, redirect to login (use absolute path)
-  if (!token) {
+  // If session is expired or no valid tokens exist, redirect immediately to login
+  if (!isAuth) {
+    clearAuthSession();
     return <Navigate to="/auth/signin" replace />;
   }
 
-  // If token exists, render the child component (the Dashboard)
+  // If token exists and is valid, render the child component (the Dashboard)
   return <Outlet />;
 };
 
 export default ProtectedRoute;
+

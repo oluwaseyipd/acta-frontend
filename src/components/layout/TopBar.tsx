@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Search, Command, Bell, Moon, Sun, Monitor, Menu } from "lucide-react";
+import { Search, Command, Bell, Moon, Sun, Monitor, Menu, User } from "lucide-react";
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ export function TopBar() {
   const { setTheme, theme } = useTheme();
   const isMobile = useIsMobile();
 
-  // Get username and email from currently logged in user. Create an avater with the first two letters of the username.
+  // Get username and email from currently logged in user. Create an avatar with the first two letters of the username.
   const { data: user } = useQuery({
     queryKey: ["currentUser"],
     queryFn: () => profileApi.getProfile(),
@@ -35,7 +35,7 @@ export function TopBar() {
   const initials = (
     (user?.first_name?.slice(0, 1) || "") +
     (user?.last_name?.slice(0, 1) || "")
-  ).toUpperCase() || "??";
+  ).toUpperCase() || (user?.email?.slice(0, 2).toUpperCase() || "");
 
 
 
@@ -146,8 +146,8 @@ export function TopBar() {
               <Avatar className="h-10 w-10 border-2 border-primary/20">
                 <AvatarImage src={user?.avatar} alt={user?.first_name} />
 
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {initials}
+                <AvatarFallback className="bg-primary text-primary-foreground flex items-center justify-center">
+                  {initials || <User className="h-5 w-5 text-primary-foreground" />}
                 </AvatarFallback>
               </Avatar>
             </Button>
