@@ -36,22 +36,20 @@ export default function Analytics() {
     return t.status !== "completed" && rawDate && isBefore(new Date(rawDate), today);
   }).length;
 
-  // --- 3. Velocity (Tasks done in last 7 days) ---
-  const last7Days = subDays(today, range);
+  // --- 3. Velocity (Tasks done in last N days) ---
+  const lastNDays = subDays(today, range);
   const recentCompleted = tasks.filter((t) => {
-    const rawDate = t.due_date || t.dueDate;
-    return t.status === "completed" && rawDate && isAfter(new Date(rawDate), last7Days);
+    const rawDate = t.completed_at || t.completedAt || t.due_date || t.dueDate;
+    return t.status === "completed" && rawDate && isAfter(new Date(rawDate), lastNDays);
   }).length;
-
-
 
   const currentStreak = useMemo(() => {
     let streak = 0;
     let checkDate = new Date();
     const completedDates = tasks
-      .filter(t => t.status === "completed" && (t.due_date || t.dueDate))
+      .filter(t => t.status === "completed" && (t.completed_at || t.completedAt || t.due_date || t.dueDate))
       .map(t => {
-        const rawDate = t.due_date || t.dueDate;
+        const rawDate = t.completed_at || t.completedAt || t.due_date || t.dueDate;
         return format(new Date(rawDate!), "yyyy-MM-dd");
       });
 

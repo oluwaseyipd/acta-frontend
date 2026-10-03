@@ -10,8 +10,13 @@ export function ActivityHeatmap({ tasks }: { tasks: any[] }) {
       <div className="flex flex-wrap gap-2">
         {last28Days.map((date) => {
           const count = tasks.filter(t => {
-            const rawDate = t.due_date || t.dueDate;
-            return t.status === "completed" && rawDate && isSameDay(new Date(rawDate), date);
+            const rawDate = t.completed_at || t.completedAt || t.due_date || t.dueDate;
+            if (t.status !== "completed" || !rawDate) return false;
+            try {
+              return isSameDay(new Date(rawDate), date);
+            } catch {
+              return false;
+            }
           }).length;
 
           return (

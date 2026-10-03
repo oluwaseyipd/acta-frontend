@@ -19,9 +19,14 @@ export function ProductivityChart({ tasks, range }: ProductivityChartProps) {
       const dateStr = range > 30 ? format(date, "MMM dd") : format(date, "dd MMM");
 
       const count = tasks.filter((task) => {
-        const rawDate = task.due_date || task.dueDate;
+        const rawDate = task.completed_at || task.completedAt || task.due_date || task.dueDate;
         if (task.status !== "completed" || !rawDate) return false;
-        return isSameDay(parseISO(rawDate), date);
+        try {
+          const parsed = typeof rawDate === "string" && rawDate.includes("T") ? parseISO(rawDate) : new Date(rawDate);
+          return isSameDay(parsed, date);
+        } catch {
+          return false;
+        }
       }).length;
 
       return { day: dateStr, completed: count };
@@ -34,7 +39,7 @@ export function ProductivityChart({ tasks, range }: ProductivityChartProps) {
     <div className="p-6 rounded-2xl bg-card border border-border shadow-sm h-[400px]">
       <div className="mb-6">
         <h3 className="text-lg font-semibold">Productivity Trend</h3>
-        <p className="text-sm text-muted-foreground">Tasks completed over the last 7 days</p>
+        <p className="text-sm text-muted-foreground">Tasks completed over the last {range} days</p>
       </div>
 
       <div className="h-[280px] w-full">

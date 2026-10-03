@@ -13,5 +13,7 @@ export interface Task {
   dueDate?: string;
   dueTime?: string;
   due_time?: string;
+  completed_at?: string;
+  completedAt?: string;
   category?: string;
 }

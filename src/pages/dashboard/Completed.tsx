@@ -62,26 +62,26 @@ export default function Completed() {
   );
 
   const groupedByDate = completedTasks.reduce(
-  (acc, task) => {
-    // 1. Get the raw date string
-    const rawDate = task.due_date || task.dueDate;
-    
-    // 2. Normalize it: Take only the YYYY-MM-DD part
-    const dateKey = rawDate ? rawDate.split('T')[0] : "No Due Date";
-    
-    if (!acc[dateKey]) acc[dateKey] = [];
-    acc[dateKey].push(task);
-    return acc;
-  },
-  {} as Record<string, Task[]>,
-);
+    (acc, task) => {
+      // 1. Get the raw date string (prioritize completed_at)
+      const rawDate = task.completed_at || task.completedAt || task.due_date || task.dueDate;
+      
+      // 2. Normalize it: Take only the YYYY-MM-DD part
+      const dateKey = rawDate ? rawDate.split('T')[0] : "No Date";
+      
+      if (!acc[dateKey]) acc[dateKey] = [];
+      acc[dateKey].push(task);
+      return acc;
+    },
+    {} as Record<string, Task[]>,
+  );
 
   const sortedDates = Object.keys(groupedByDate).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime(), // Completed usually shows newest first
   );
 
   const formatColumnDate = (dateStr: string) => {
-    if (!dateStr || dateStr === "No Due Date") return "No Due Date";
+    if (!dateStr || dateStr === "No Date" || dateStr === "No Due Date") return "No Date";
     try {
       return format(new Date(dateStr), "EEEE, MMM d, yyyy");
     } catch {
@@ -163,7 +163,7 @@ export default function Completed() {
                 </h3>
                 <AnimatePresence mode="popLayout">
                   {groupedByDate[dateKey].map((task) => {
-                    const time = extractTime(task.due_date || task.dueDate);
+                    const time = extractTime(task.completed_at || task.completedAt || task.due_date || task.dueDate);
                     return (
                       <motion.div
                         key={task.id}
@@ -246,7 +246,7 @@ export default function Completed() {
                   >
                   <AnimatePresence mode="popLayout">
                     {groupedByDate[dateKey].map((task) => {
-                      const time = extractTime(task.due_date || task.dueDate);
+                      const time = extractTime(task.completed_at || task.completedAt || task.due_date || task.dueDate);
                       return (
                         <motion.div
                           key={task.id}
